@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="public/icon-128.png" alt="logo"/>
+  <img src="../public/icon-128.png" alt="logo"/>
   <h1>Gemini Voyager</h1>
-  <h3>Make Your Gemini Experience Truly Yours ✨</h3>
+  <h3>打造属于你的 Gemini 体验 ✨</h3>
   <p>
-    Navigate conversations with an elegant timeline, organize chats with folders, and build your own prompt library.<br>
-    <b>It's the missing power-up for Google Gemini.</b>
+    优雅的时间线导航、文件夹管理对话、构建专属提示词库。<br>
+    <b>这是 Google Gemini 缺失的那块拼图。</b>
   </p>
   
   <p>
@@ -16,11 +16,11 @@
     <img src="https://img.shields.io/badge/Brave-✓-FB542B?style=flat-square&logo=brave&logoColor=white" alt="Brave">
   </p>
   <p>
-    <img src="https://img.shields.io/github/stars/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="GitHub stars">
-    <img src="https://img.shields.io/github/forks/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="GitHub forks">
-    <img src="https://img.shields.io/github/v/release/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="Latest version">
-    <img src="https://img.shields.io/chrome-web-store/users/kjdpnimcnfinmilocccippmododhceol?style=flat-square&logo=google-chrome" alt="Chrome Web Store users">
-    <img src="https://img.shields.io/chrome-web-store/rating/kjdpnimcnfinmilocccippmododhceol?style=flat-square&logo=google-chrome" alt="Chrome Web Store rating">
+    <img src="https://img.shields.io/github/stars/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="GitHub Star">
+    <img src="https://img.shields.io/github/forks/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="GitHub Fork">
+    <img src="https://img.shields.io/github/v/release/Nagi-ovo/gemini-voyager?style=flat-square&logo=github" alt="最新版本">
+    <img src="https://img.shields.io/chrome-web-store/users/kjdpnimcnfinmilocccippmododhceol?style=flat-square&logo=google-chrome" alt="Chrome 商店用户数">
+    <img src="https://img.shields.io/chrome-web-store/rating/kjdpnimcnfinmilocccippmododhceol?style=flat-square&logo=google-chrome" alt="Chrome 商店评分">
   </p>
 </div>
 
@@ -29,180 +29,180 @@
   </p>
 
 <p align="center">
-  <a href="https://www.nagi.fun/gemini-voyager/en">📖 Documentation</a> • 
-  <a href="./.github/README_ZH.md">中文说明</a>
+  <a href="https://nagi.fun/gemini-voyager/">📖 文档</a> • 
+  <a href="../README.md">English</a>
 </p>
 
 ---
 
-## 👋 Why Gemini Voyager?
+## 👋 为什么开发 Gemini Voyager？
 
-We love Gemini, but sometimes we wish it had just a *bit* more structure. 
+我们都很喜欢 Gemini，但有时候总觉得它少了一点"秩序感"。
 
-That's why we built **Gemini Voyager**. It's not just a tool; it's a companion that helps you keep your AI conversations organized, accessible, and productive. Whether you're a researcher juggling dozens of threads, a developer saving code snippets, or just someone who loves order, Voyager is designed for you.
-
----
-
-## 📚 Table of Contents
-
-- [👋 Why Gemini Voyager?](#-why-gemini-voyager)
-- [📚 Table of Contents](#-table-of-contents)
-- [✨ Features](#-features)
-  - [📍 Timeline Navigation](#-timeline-navigation)
-  - [📂 Folder Organization](#-folder-organization)
-  - [💡 Prompt Library](#-prompt-library)
-  - [📐 Formula Copy](#-formula-copy)
-  - [🍌 NanoBanana Option](#-nanobanana-option)
-  - [🔬 Deep Research Export](#-deep-research-export)
-  - [💾 Chat Export](#-chat-export)
-  - [📏 Adjustable Chat Width](#-adjustable-chat-width)
-- [📥 Installation](#-installation)
-  - [Option 1: Chrome Web Store (Easier)](#option-1-chrome-web-store-easier)
-  - [Option 2: Manual Installation (Latest Features)](#option-2-manual-installation-latest-features)
-    - [1) Temporary (developer) install — quick \& safe](#1-temporary-developer-install--quick--safe)
-    - [2) Permanent install (Firefox ESR — install unsigned add-ons)](#2-permanent-install-firefox-esr--install-unsigned-add-ons)
-- [🛠️ For Developers](#️-for-developers)
-  - [Safari Development](#safari-development)
-- [🌟 Related Projects \& Credits](#-related-projects--credits)
-- [🤝 Contributing](#-contributing)
-- [☕ Support This Project](#-support-this-project)
+这就是我们开发 **Gemini Voyager** 的初衷。它不仅仅是一个工具，更是一个能帮你把 AI 对话变得井井有条、触手可及的得力助手。无论你是需要处理大量对话的研究人员，还是喜欢收藏代码片段的开发者，亦或是单纯的整理控，Voyager 都是为你准备的。
 
 ---
 
-## ✨ Features
+## 📚 目录
+
+- [👋 为什么开发 Gemini Voyager？](#-为什么开发-gemini-voyager)
+- [📚 目录](#-目录)
+- [✨ 功能特性](#-功能特性)
+  - [📍 时间线导航](#-时间线导航)
+  - [📂 文件夹管理](#-文件夹管理)
+  - [💡 提示词库](#-提示词库)
+  - [📐 公式复制](#-公式复制)
+  - [🍌 NanoBanana 选项](#-nanobanana-选项)
+  - [🔬 Deep Research 导出](#-deep-research-导出)
+  - [💾 对话导出](#-对话导出)
+  - [📏 对话宽度调整](#-对话宽度调整)
+- [📥 安装方式](#-安装方式)
+  - [方式一：Chrome 应用商店（更方便）](#方式一chrome-应用商店更方便)
+  - [方式二：手动安装（抢鲜版）](#方式二手动安装抢鲜版)
+    - [1）临时安装（开发者模式）—— 简单且安全](#1临时安装开发者模式-简单且安全)
+    - [2）永久安装（适用于 Firefox ESR，可安装未签名插件）](#2永久安装适用于-firefox-esr可安装未签名插件)
+- [🛠️ 开发者指南](#️-开发者指南)
+  - [Safari 开发](#safari-开发)
+- [🌟 相关项目与致谢](#-相关项目与致谢)
+- [🤝 参与贡献](#-参与贡献)
+- [☕ 支持本项目](#-支持本项目)
+
+---
+
+## ✨ 功能特性
 
 <div align="center">
-  <img src="docs/public/assets/teaser.png" alt="teaser"/>
+  <img src="../docs/public/assets/teaser.png" alt="teaser"/>
 </div>
 
-### 📍 Timeline Navigation
-**Never get lost in a long conversation again.**
-Visual nodes let you see the structure of your chat at a glance.
-- **Jump instantly**: Click a node to scroll right to that message.
-- **Peek content**: Hover to see what was said without scrolling.
-- **Mark what matters**: Long-press to star important messages (synced across tabs!).
+### 📍 时间线导航
+**再也不在长对话中迷路。**
+通过可视化的节点，一眼看清对话结构。
+- **瞬间跳转**：点击节点即可直接滚动到对应消息。
+- **快速预览**：鼠标悬停即可查看内容，无需来回滚动。
+- **标记重点**：长按节点即可星标重要消息（跨标签页同步！）。
 
-### 📂 Folder Organization
-**Keep your ideas sorted.**
-Stop digging through a messy history list. Drag and drop your chats into folders that make sense to you.
-- **Two-level hierarchy**: Folders and subfolders for deep organization.
-- **Easy management**: Double-click to rename, long-press to multi-select.
-- **Syncs everywhere**: Import/export your structure to keep your devices in sync.
+### 📂 文件夹管理
+**让灵感井井有条。**
+告别杂乱无章的历史记录列表。将你的对话拖拽到文件夹中，按照你的逻辑进行分类。
+- **两级层级**：支持文件夹和子文件夹，满足深度整理需求。
+- **轻松管理**：双击重命名，长按多选。
+- **多端同步**：支持导入/导出，让你的整理成果在不同设备间无缝衔接。
 
 <details>
-<summary>👀 See it in action</summary>
+<summary>👀 查看演示</summary>
 
 <table>
   <tr>
     <td align="center" width="50%">
       <p><b>Gemini</b></p>
-      <img src="docs/public/assets/gemini-folders.png" alt="Gemini folders" style="max-width: 100%;"/>
+      <img src="../docs/public/assets/gemini-folders.png" alt="Gemini 文件夹" style="max-width: 100%;"/>
     </td>
     <td align="center" width="50%">
       <p><b>AI Studio</b></p>
-      <img src="docs/public/assets/aistudio-folders.png" alt="AI Studio folders" style="max-width: 100%;"/>
+      <img src="../docs/public/assets/aistudio-folders.png" alt="AI Studio 文件夹" style="max-width: 100%;"/>
     </td>
   </tr>
 </table>
 
 </details>
 
-### 💡 Prompt Library
-**Your personal prompt arsenal.**
-Don't rewrite the same instructions. Save your best prompts and use them anywhere.
-- **Tag & Search**: Find the right prompt in seconds.
-- **Universal Access**: Works on Gemini, AI Studio, and now **any website** you choose.
+### 💡 提示词库
+**你的私人提示词宝库。**
+不要重复编写相同的指令。保存你最常用的提示词，随时随地调用。
+- **标签与搜索**：通过标签分类，秒级找到你需要的提示词。
+- **全网通用**：不仅支持 Gemini 和 AI Studio，现在更支持添加**自定义网站**，在任何网页使用提示词管理器。
 
 <details>
-<summary>👀 View screenshot</summary>
+<summary>👀 查看截图</summary>
 
 <div align="center">
-  <img src="docs/public/assets/gemini-prompt-manager.png" alt="Prompt manager" style="max-width: 100%;"/>
+  <img src="../docs/public/assets/gemini-prompt-manager.png" alt="提示词管理器" style="max-width: 100%;"/>
 </div>
 
 </details>
 
-### 📐 Formula Copy
-**For the math wizards.**
-See a beautiful LaTeX formula? One click copies the source code. No more manual re-typing.
+### 📐 公式复制
+**理科生的福音。**
+看到漂亮的 LaTeX 公式想复用？点击一下即可复制源代码，告别手动敲击。
 
 <details>
-<summary>👀 View screenshot</summary>
+<summary>👀 查看截图</summary>
 
 <div align="center">
-  <img src="docs/public/assets/gemini-math-copy.png" alt="Formula copy" style="max-width: 100%;"/>
+  <img src="../docs/public/assets/gemini-math-copy.png" alt="公式复制" style="max-width: 100%;"/>
 </div>
 
 </details>
 
-### 🍌 NanoBanana Option
-**Lossless watermark removal for Gemini images.**
-Automatically removes the visible "Gemini" watermark from AI-generated images (NanoBanana) using a reverse alpha blending algorithm.
-- **Zero quality loss**: Reconstructs original pixels for a perfectly clean image.
-- **Set and forget**: Just enable it once in settings and it works automatically.
-- **Direct Download**: Replaces the native download button with a 🍌 button that saves the clean, processed image directly.
-- **Privacy focus**: All processing happens 100% locally in your browser.
+### 🍌 NanoBanana 选项
+**Gemini 图片无损去水印。**
+使用反向 Alpha 混合算法，自动去除 AI 生成图片 (NanoBanana) 上的可见 "Gemini" 水印。
+- **零质量损失**：完美还原原始像素，得到纯净图片。
+- **一键启用**：在设置面板开启后即可全程自动运行。
+- **直接下载**：使用 🍌 图标完全替代原生的下载按钮。点击即可直接下载 100% 无水印的已处理版本。
+- **隐私保护**：所有处理 100% 在浏览器本地完成。
 
 > [!NOTE]
-> This feature is powered by the [gemini-watermark-remover](https://github.com/journey-ad/gemini-watermark-remover) algorithm by [journey-ad](https://github.com/journey-ad), which is based on the [original C++ implementation](https://github.com/allenk/GeminiWatermarkTool) by [allenk](https://github.com/allenk). 🧡
+> 本功能基于 [journey-ad](https://github.com/journey-ad) 开发的 [gemini-watermark-remover](https://github.com/journey-ad/gemini-watermark-remover) 算法实现，其核心逻辑源自 [allenk](https://github.com/allenk) 的 [C++ 原始版本](https://github.com/allenk/GeminiWatermarkTool)。🧡
 
 <details>
-<summary>👀 View screenshot</summary>
+<summary>👀 查看截图</summary>
 
 <div align="center">
-  <img src="docs/public/assets/nanobanana.png" alt="NanoBanana" style="max-width: 100%;"/>
+  <img src="../docs/public/assets/nanobanana.png" alt="NanoBanana" style="max-width: 100%;"/>
 </div>
 
 </details>
 
-### 🔬 Deep Research Export
-**Extract thinking content from Deep Research conversations.**
-One-click export to Markdown format preserving all thinking phases and research links. Click the share & export button in Deep Research conversations to download.
+### 🔬 Deep Research 导出
+**提取 Deep Research 对话的思考内容。**
+一键导出为 Markdown 格式，保留所有思考阶段和研究链接。在 Deep Research 对话中点击分享和导出按钮即可下载。
 
-### 💾 Chat Export
-**Your data, your format.**
-Take your conversations with you.
-- **Formats**: Structured JSON or print-friendly Markdown/PDF.
-- **Clean**: We strip out the UI noise so you get just the content.
-- **Complete**: Images are automatically packaged into an `assets/` folder.
+### 💾 对话导出
+**你的数据，你做主。**
+将对话以你需要的格式保存下来。
+- **多种格式**：结构化的 JSON 或适合打印阅读的 Markdown/PDF。
+- **干净纯粹**：自动移除界面上的无关元素，只保留核心内容。
+- **完整无缺**：图片会自动打包到 `assets/` 文件夹中。
 
 <details>
-<summary>👀 View export guide</summary>
+<summary>👀 查看导出指南</summary>
 
 <table>
   <tr>
     <td align="center" width="50%">
-      <p><b>Step 1: Click the export icon</b></p>
-      <img src="docs/public/assets/gemini-export-guide-1.png" alt="Export guide step 1" style="max-width: 100%;"/>
+      <p><b>步骤 1：点击导出图标</b></p>
+      <img src="../docs/public/assets/gemini-export-guide-1.png" alt="导出指南步骤 1" style="max-width: 100%;"/>
     </td>
     <td align="center" width="50%">
-      <p><b>Step 2: Choose export format</b></p>
-      <img src="docs/public/assets/gemini-export-guide-2.png" alt="Export guide step 2" style="max-width: 100%;"/>
+      <p><b>步骤 2：选择导出格式</b></p>
+      <img src="../docs/public/assets/gemini-export-guide-2.png" alt="导出指南步骤 2" style="max-width: 100%;"/>
     </td>
   </tr>
 </table>
 
 </details>
 
-### 📏 Adjustable Chat Width
+### 📏 对话宽度调整
 
-**Read comfortably.**
-Wide screen? Make use of it. Customize the chat container width (400px - 1400px) to suit your reading preference.
+**怎么舒服怎么来。**
+屏幕够大？那就利用起来。自定义对话框宽度（400px - 1400px），找到最适合你的阅读体验。
 
-> **Settings**: Click the extension icon for scroll mode, chat width, and timeline options.
+> **设置面板**：点击扩展图标调整滚动模式、对话宽度和时间线选项。
 
 <details>
-<summary>View tutorial</summary>
+<summary>查看教程</summary>
 
 <table>
   <tr>
     <td align="center" width="50%">
-      <p><b>How to open settings</b></p>
-      <img src="docs/public/assets/gemini-open-settings-guide.png" alt="Open settings guide" style="max-width: 100%;"/>
+      <p><b>如何打开设置</b></p>
+      <img src="../docs/public/assets/gemini-open-settings-guide.png" alt="打开设置指南" style="max-width: 100%;"/>
     </td>
     <td align="center" width="50%">
-      <p><b>Chat width adjustment</b></p>
-      <img src="docs/public/assets/gemini-chatwidth.png" alt="Chat width adjustment" style="max-width: 100%;"/>
+      <p><b>对话宽度调整</b></p>
+      <img src="../docs/public/assets/gemini-chatwidth.png" alt="对话宽度调整" style="max-width: 100%;"/>
     </td>
   </tr>
 </table>
@@ -211,156 +211,154 @@ Wide screen? Make use of it. Customize the chat container width (400px - 1400px)
 
 ---
 
-## 📥 Installation
+## 📥 安装方式
 
-> **⚠️ Note:** The Chrome Web Store version may lag behind due to review delays. For the latest features, use [GitHub Releases](https://github.com/Nagi-ovo/gemini-voyager/releases).
+> **⚠️ 注意：** Chrome 应用商店的版本可能因审核延迟而不是最新的。如需最新功能，请使用 [GitHub Releases](https://github.com/Nagi-ovo/gemini-voyager/releases)。
 
-### Option 1: Chrome Web Store (Easier)
+### 方式一：Chrome 应用商店（更方便）
 
 <div align="center">
   <a href="https://chromewebstore.google.com/detail/kjdpnimcnfinmilocccippmododhceol?utm_source=item-share-cb" target="_blank">
-    <img src="https://img.shields.io/badge/Install%20from-Chrome%20Web%20Store-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Install from Chrome Web Store" height="50">
+    <img src="https://img.shields.io/badge/从这里安装-Chrome%20应用商店-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white" alt="从 Chrome 应用商店安装" height="50">
   </a>
 </div>
 
-The easiest installation method, but may not have the latest features:
+最简单的安装方法，但可能没有最新功能：
 
-1. Click the button above to visit the Chrome Web Store
-2. Click "Add to Chrome"
-3. The extension will activate automatically on Gemini
+1. 点击上方按钮访问 Chrome 应用商店
+2. 点击"添加至 Chrome"
+3. 扩展会自动在 Gemini 上激活
 
-**Works on:** Chrome, Edge, Opera, Brave, Vivaldi, Arc, and other Chromium browsers
+**适用于：** Chrome、Edge、Opera、Brave、Vivaldi、Arc 等所有 Chromium 浏览器
 
 <details>
-<summary>Installation tips for Edge and Opera users</summary>
+<summary>Edge 和 Opera 用户的安装说明</summary>
 
-**For Microsoft Edge users:**
-1. Visit Chrome Web Store via the button above
-2. You'll see a prompt "Allow extensions from other stores"
-3. Click "Allow" and install normally
+**Microsoft Edge 用户：**
+1. 通过上方按钮访问 Chrome 应用商店
+2. 浏览器会提示"允许来自其他商店的扩展"
+3. 点击"允许"后即可正常安装
 
-**For Opera users:**
-1. First install [Install Chrome Extensions](https://addons.opera.com/extensions/details/install-chrome-extensions/) (official Opera extension)
-2. Then visit Chrome Web Store
-3. Install like you would on Chrome
+**Opera 用户：**
+1. 先安装 [Install Chrome Extensions](https://addons.opera.com/extensions/details/install-chrome-extensions/)（Opera 官方扩展）
+2. 然后访问 Chrome 应用商店
+3. 像在 Chrome 上一样安装即可
 
-**For Brave, Vivaldi, Arc, and other Chromium browsers:**  
-No extra steps needed—just install directly from Chrome Web Store!
+**Brave、Vivaldi、Arc 等其他 Chromium 浏览器：**  
+无需任何额外步骤，直接从 Chrome 应用商店安装即可！
 </details>
 
-### Option 2: Manual Installation (Latest Features)
+### 方式二：手动安装（抢鲜版）
 
-**For Chromium browsers (Chrome, Edge, Opera, Brave, Vivaldi, Arc):**
+**Chromium 浏览器（Chrome、Edge、Opera、Brave、Vivaldi、Arc）：**
 
-1. Go to the [repository Releases page](https://github.com/Nagi-ovo/gemini-voyager/releases) and download the latest `gemini-voyager-chrome-vX.Y.Z.zip`
-2. Unzip it to a folder (you will see `manifest.json` at the root)
-3. Open your extensions page and enable Developer mode:
-   - Chrome: `chrome://extensions`
-   - Edge: `edge://extensions`
-   - Opera: `opera://extensions`
-4. Click "Load unpacked"
-5. Select the unzipped folder
+1. 前往[项目 Releases 页面](https://github.com/Nagi-ovo/gemini-voyager/releases)，下载最新的 `gemini-voyager-chrome-vX.Y.Z.zip`
+2. 解压到任意文件夹（可看到根目录下的 `manifest.json` 文件）
+3. 打开浏览器的扩展管理页面并启用"开发者模式"：
+   - Chrome：访问 `chrome://extensions`
+   - Edge：访问 `edge://extensions`
+   - Opera：访问 `opera://extensions`
+4. 点击"加载已解压的扩展程序"
+5. 选择刚才解压的文件夹
 
 <details>
-<summary>Firefox Installation</summary>
+<summary>Firefox 安装方法</summary>
 
-#### 1) Temporary (developer) install — quick & safe
-1. Go to the [repository Releases page](https://github.com/Nagi-ovo/gemini-voyager/releases) and download `gemini-voyager-firefox-vX.Y.Z.zip`
-2. Unzip it
-3. Open `about:debugging#/runtime/this-firefox` in Firefox
-4. Click "Load Temporary Add-on…"
-5. Select the `manifest.json` inside the unzipped folder
+#### 1）临时安装（开发者模式）—— 简单且安全
+1. 前往 [项目 Releases 页面](https://github.com/Nagi-ovo/gemini-voyager/releases)，下载 `gemini-voyager-firefox-vX.Y.Z.zip`
+2. 解压文件
+3. 在 Firefox 中打开 `about:debugging#/runtime/this-firefox`
+4. 点击"临时载入附加组件..."
+5. 选择解压文件夹中的 `manifest.json` 文件
 
-> Note: This method is temporary — the add-on will be removed when Firefox restarts.
+> 提示：此方法为临时安装，重启 Firefox 后需重新载入。
 
-#### 2) Permanent install (Firefox ESR — install unsigned add-ons)
-If you prefer a persistent installation and are using Firefox ESR (Extended Support Release), you can enable installation of unsigned add-ons. This allows you to install the release build directly:
+#### 2）永久安装（适用于 Firefox ESR，可安装未签名插件）
+如果你希望永久安装并使用发行版构建，可在 Firefox ESR（Extended Support Release）中允许安装未签名扩展：
 
-1. Install [`firefox-esr`](https://www.mozilla.org/firefox/enterprise/) (ESR builds provide the configuration option described below).
-2. In the address bar enter `about:config` and accept the risk prompt.
-3. Search for `xpinstall.signatures.required` and set its value to `false`.
-4. Download `gemini-voyager-firefox-vX.Y.Z.xpi` from Releases.
-5. Drag the `.xpi` file into an open Firefox ESR window, or open the Add-ons Manager and install the file.
+1. 安装 [`firefox-esr`](https://www.mozilla.org/zh-CN/firefox/enterprise/)（ESR 版本通常提供以下配置选项）。
+2. 地址栏输入 `about:config`，接受风险提示后继续。
+3. 搜索 `xpinstall.signatures.required`，将其值设为 `false`。
+4. 从 Releases 下载 `gemini-voyager-firefox-vX.Y.Z.xpi`。
+5. 将 `.xpi` 文件拖入已打开的 Firefox ESR 窗口，或通过附加组件管理器安装该文件。
 
-Cautions:
-- Disabling signature enforcement allows installation of unsigned extensions and reduces security. Only install trusted builds.
-- This preference is typically available in Firefox ESR; recent standard Firefox releases no longer allow unsigned extensions. If the preference is unavailable, use the temporary developer install or official signed releases.
-- After installing, you may wish to keep `xpinstall.signatures.required` set to `false` for continued use, or revert it to `true` if you later install only signed extensions.
+注意事项：
+- 关闭签名校验会降低浏览器安全性，请仅在信任的构建下使用此方法。
+- 该偏好项通常只在 Firefox ESR 可用；在新版标准 Firefox 中可能不可用。如果找不到该选项，请使用临时安装或等待官方签名发布。
+- 安装完成后，根据需要决定是否保留 `xpinstall.signatures.required` 为 `false`，或在不再需要未签名扩展时切回 `true`。
 </details>
 
 <details>
-<summary>Safari Installation</summary>
+<summary>Safari 安装方法</summary>
 
-1. Download `gemini-voyager-safari-vX.Y.Z.zip` from [Releases](https://github.com/Nagi-ovo/gemini-voyager/releases)
-2. Unzip and convert: `xcrun safari-web-extension-converter dist_safari --macos-only --app-name "Gemini Voyager"`
-3. Open in Xcode and run (⌘R)
-4. Enable in Safari → Settings → Extensions
+1. 从 [Releases](https://github.com/Nagi-ovo/gemini-voyager/releases) 下载 `gemini-voyager-safari-vX.Y.Z.zip`
+2. 解压并转换：`xcrun safari-web-extension-converter dist_safari --macos-only --app-name "Gemini Voyager"`
+3. 在 Xcode 中打开并运行（⌘R）
+4. 在 Safari → 设置 → 扩展中启用
 
-**Requirements:** macOS 11+, Xcode Command Line Tools (`xcode-select --install`), Safari 14+
+**系统要求：** macOS 11+、Xcode Command Line Tools（`xcode-select --install`）、Safari 14+
 
-**Note:** No Apple Developer account needed for local use! For detailed instructions, see the [installation guide](.github/docs/safari/INSTALLATION.md) ([中文](.github/docs/safari/INSTALLATION_ZH.md)).
+**注意：** 本地使用无需 Apple Developer 账号！详细说明请查看 [安装指南](../.github/docs/safari/INSTALLATION_ZH.md)。
 </details>
 
 ---
 
-## 🛠️ For Developers
+## 🛠️ 开发者指南
 
 <details>
-<summary>Click to see development setup instructions</summary>
+<summary>点击查看开发环境配置方法</summary>
 
-Want to contribute or customize the extension? Here's how to set up the development environment:
+想要参与贡献或自定义扩展？以下是开发环境配置方法：
 
 ```bash
-# Install dependencies (Bun recommended)
+# 安装依赖（推荐使用 Bun）
 bun i
 
-# Development mode (with auto-reload)
-bun run dev:chrome   # Chrome & Chromium browsers
+# 开发模式（支持热重载）
+bun run dev:chrome   # Chrome 和 Chromium 浏览器
 bun run dev:firefox  # Firefox
-bun run dev:safari   # Safari (requires macOS)
+bun run dev:safari   # Safari（需要 macOS）
 
-# Production builds
+# 生产构建
 bun run build:chrome   # Chrome
 bun run build:firefox  # Firefox
 bun run build:safari   # Safari
-bun run build:all      # All browsers
+bun run build:all      # 所有浏览器
 ```
 
-### Safari Development
+### Safari 开发
 
-Safari requires additional build steps. See [safari/README.md](safari/README.md) for:
-- Building from source
-- Development workflow with auto-reload
-- Adding Swift native code
-- Debugging and distribution
+Safari 需要额外的构建步骤。查看 [safari/README_ZH.md](../safari/README_ZH.md) 了解：
+- 从源代码构建
+- 开发工作流与自动重载
+- 添加 Swift 原生代码
+- 调试与发布
 
-[<img src="https://devin.ai/assets/askdeepwiki.png" alt="Ask DeepWiki" height="20"/>](https://deepwiki.com/Nagi-ovo/gemini-voyager )
-
-For contribution guidelines and best practices, see [CONTRIBUTING.md](./.github/CONTRIBUTING.md).
+开发规范和最佳实践请参考 [CONTRIBUTING.md](./CONTRIBUTING.md)。
 </details>
 
 ---
 
-## 🌟 Related Projects & Credits
+## 🌟 相关项目与致谢
 
-- **[DeepSeek Voyager](https://github.com/Azurboy/deepseek-voyager)** - A fork of Gemini Voyager adapted for DeepSeek, bringing timeline navigation and chat management to DeepSeek users!
+- **[DeepSeek Voyager](https://github.com/Azurboy/deepseek-voyager)** - Gemini Voyager 的 Fork 版本，为 DeepSeek 适配，为 DeepSeek 用户带来时间线导航和对话管理功能！
 
-- **[ChatGPT Conversation Timeline](https://github.com/Reborn14/chatgpt-conversation-timeline)** - The original timeline navigation extension for ChatGPT that inspired this project: Gemini Voyager adapted the timeline concept for Gemini and added extensive new features including folder management, prompt library, and chat export.
+- **[ChatGPT Conversation Timeline](https://github.com/Reborn14/chatgpt-conversation-timeline)** - 为 ChatGPT 设计的时间线导航扩展，本项目的灵感来源：Gemini Voyager 为 Gemini 适配了时间线概念，并添加了文件夹管理、提示词库、聊天导出等大量新功能。
 
 
-## 🤝 Contributing
+## 🤝 参与贡献
 [<img src="https://devin.ai/assets/askdeepwiki.png" alt="Ask DeepWiki" height="20"/>](https://deepwiki.com/Nagi-ovo/gemini-voyager )
 
-We welcome contributions! Whether you want to report bugs, suggest features, improve documentation, or submit code:
+欢迎参与贡献！无论是报告问题、提出功能建议、改进文档还是提交代码：
 
-- **Issues**: Use our [bug report](https://github.com/Nagi-ovo/gemini-voyager/blob/main/.github/ISSUE_TEMPLATE/bug_report.md) or [feature request](https://github.com/Nagi-ovo/gemini-voyager/blob/main/.github/ISSUE_TEMPLATE/feat_request.md) templates
-- **Pull Requests**: Check out [CONTRIBUTING.md](./.github/CONTRIBUTING.md) for guidelines
+- **Issue**：使用我们的 [Bug 报告模板](https://github.com/Nagi-ovo/gemini-voyager/blob/main/.github/ISSUE_TEMPLATE/bug_report.md)或[功能请求模板](https://github.com/Nagi-ovo/gemini-voyager/blob/main/.github/ISSUE_TEMPLATE/feat_request.md)
+- **Pull Request**：查看[贡献指南](./CONTRIBUTING.md)了解详细说明
 
-Thank you for helping make Gemini Voyager better! ❤️
+感谢你帮助 Gemini Voyager 变得更好！❤️
 
 ---
 
-## ☕ Support This Project
+## ☕ 支持本项目
 
 <div align="center">
   <a href="https://github.com/Nagi-ovo/gemini-voyager">
@@ -368,23 +366,23 @@ Thank you for helping make Gemini Voyager better! ❤️
   </a>
 </div>
 
-If Gemini Voyager makes your life easier, consider buying me a coffee. It helps keep the updates coming!
+如果 Gemini Voyager 让你的工作效率提升了，不妨请我喝杯咖啡，这将支持我持续维护和更新！
 
 <div align="center">
   <a href="https://www.buymeacoffee.com/Nag1ovo" target="_blank">
     <img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" >
   </a>
   
-  <p><b>Or support via WeChat / Alipay / Afdian:</b></p>
+  <p><b>或通过微信 / 支付宝 / 爱发电支持：</b></p>
   <table align="center" border="0" cellpadding="0" cellspacing="0">
     <tr>
       <td align="center">
-        <img src="docs/public/assets/wechat-sponsor.png" alt="WeChat Pay" height="160"><br>
-        <sub><b>WeChat Pay</b></sub>
+        <img src="../docs/public/assets/wechat-sponsor.png" alt="微信支付" height="160"><br>
+        <sub><b>微信支付</b></sub>
       </td>
       <td align="center">
-        <img src="docs/public/assets/alipay-sponsor.jpg" alt="Alipay" height="160"><br>
-        <sub><b>Alipay</b></sub>
+        <img src="../docs/public/assets/alipay-sponsor.jpg" alt="支付宝" height="160"><br>
+        <sub><b>支付宝</b></sub>
       </td>
       <td align="center">
         <a href="https://afdian.com/a/nagi-ovo" target="_blank">
@@ -394,7 +392,7 @@ If Gemini Voyager makes your life easier, consider buying me a coffee. It helps 
             <img alt="Nagi-ovo's Profile" src="https://afdian-connect.deno.dev/profile.svg?slug=nagi-ovo" height="160" />
           </picture>
         </a><br>
-        <sub><b>Afdian</b></sub>
+        <sub><b>爱发电</b></sub>
       </td>
     </tr>
   </table>
@@ -413,3 +411,4 @@ If Gemini Voyager makes your life easier, consider buying me a coffee. It helps 
   <p>Made with ❤️ by Jesse Zhang</p>
   <sub>MIT License © 2025</sub>
 </div>
+</content>

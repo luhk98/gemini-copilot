@@ -56,8 +56,7 @@ export class TimelineManager {
   private pendingActiveId: string | null = null;
   private activeChangeTimer: number | null = null;
   private tooltipHideDelay = 100;
-  private scrollMode: 'jump' | 'flow' = 'flow';
-  private hideContainer: boolean = false;
+  private scrollMode: 'flow' = 'flow';
   private runnerRing: HTMLElement | null = null;
   private flowAnimating = false;
   private tooltipHideTimer: number | null = null;
@@ -123,13 +122,6 @@ export class TimelineManager {
   private onBarLeave: (() => void) | null = null;
   private onSliderEnter: (() => void) | null = null;
   private onSliderLeave: (() => void) | null = null;
-  private draggable = false;
-  private barDragging = false;
-  private barStartPos = { x: 0, y: 0 };
-  private barStartOffset = { x: 0, y: 0 };
-  private onBarPointerDown: ((ev: PointerEvent) => void) | null = null;
-  private onBarPointerMove: ((ev: PointerEvent) => void) | null = null;
-  private onBarPointerUp: ((ev: PointerEvent) => void) | null = null;
   private eventBusUnsubscribers: Array<() => void> = [];
   private shortcutUnsubscribe: (() => void) | null = null;
   private navigationQueue: Array<'previous' | 'next'> = [];
@@ -148,83 +140,64 @@ export class TimelineManager {
     this.handleStarredMessageNavigation();
     // Initialize keyboard shortcuts
     await this.initKeyboardShortcuts();
-    try {
-      // prefer chrome.storage if available to sync with popup
-      if ((window as any).chrome?.storage?.sync) {
-        (window as any).chrome.storage.sync.get(
-          {
-            geminiTimelineScrollMode: 'flow',
-            geminiTimelineHideContainer: false,
-            geminiTimelineDraggable: false,
-            geminiTimelinePosition: null,
-          },
-          (res: any) => {
-            const m = res?.geminiTimelineScrollMode;
-            if (m === 'flow' || m === 'jump') this.scrollMode = m;
-            this.hideContainer = !!res?.geminiTimelineHideContainer;
-            this.applyContainerVisibility();
-            this.toggleDraggable(!!res?.geminiTimelineDraggable);
 
-            // Load position with auto-migration from v1 to v2
-            const position = res?.geminiTimelinePosition;
-            if (position) {
-              const viewportWidth = window.innerWidth;
-              const viewportHeight = window.innerHeight;
+    // Initial alignment
+    this.alignToAvatar();
 
-              // v2 format: use percentage (responsive)
-              if (position.version === 2 && position.topPercent !== undefined && position.leftPercent !== undefined) {
-                const top = (position.topPercent / 100) * viewportHeight;
-                const left = (position.leftPercent / 100) * viewportWidth;
-                this.applyPosition(top, left);
-              }
-              // v1 format: migrate to v2 (auto-upgrade)
-              else if (position.top !== undefined && position.left !== undefined) {
-                // Apply old position first
-                this.applyPosition(position.top, position.left);
+    // Listen for resize to re-align
+    this.onWindowResize = () => {
+      this.updateTimelineGeometry();
+      this.alignToAvatar();
+    };
+    window.addEventListener('resize', this.onWindowResize);
 
-                // Migrate to v2 format (percentage-based)
-                const migratedPosition = {
-                  version: 2,
-                  topPercent: (position.top / viewportHeight) * 100,
-                  leftPercent: (position.left / viewportWidth) * 100,
-                };
-                chrome.storage.sync.set({ geminiTimelinePosition: migratedPosition });
-              }
-            }
-          }
-        );
-        // listen for changes from popup and update mode live
-        try {
-          (window as any).chrome.storage.onChanged.addListener((changes: any, area: string) => {
-            if (area !== 'sync') return;
-            if (changes?.geminiTimelineScrollMode) {
-              const n = changes.geminiTimelineScrollMode.newValue;
-              if (n === 'flow' || n === 'jump') this.scrollMode = n;
-            }
-            if (changes?.geminiTimelineHideContainer) {
-              this.hideContainer = !!changes.geminiTimelineHideContainer.newValue;
-              this.applyContainerVisibility();
-            }
-            if (changes?.geminiTimelineDraggable) {
-              this.toggleDraggable(!!changes.geminiTimelineDraggable.newValue);
-            }
-            if (changes?.geminiTimelinePosition && !changes.geminiTimelinePosition.newValue) {
-              this.ui.timelineBar!.style.top = '';
-              this.ui.timelineBar!.style.left = '';
-            }
-          });
-        } catch {}
-      } else {
-        const saved = localStorage.getItem('geminiTimelineScrollMode');
-        if (saved === 'flow' || saved === 'jump') this.scrollMode = saved;
-      }
-    } catch {}
+    // Periodically check alignment in case of dynamic page changes (e.g. sidebar toggle)
+    setInterval(() => this.alignToAvatar(), 2000);
   }
 
-  private applyContainerVisibility(): void {
+  private alignToAvatar(): void {
     if (!this.ui.timelineBar) return;
-    this.ui.timelineBar.classList.toggle('timeline-no-container', !!this.hideContainer);
+
+    // Try to find the avatar element (Google Profile button)
+    // Selectors for Gemini and AI Studio
+    const selectors = [
+      '#gb button[aria-label*="Account"]',
+      '#gb a[aria-label*="Account"]',
+      '#gb [aria-label*="Google Account"]',
+      '.gb_A[aria-label*="Account"]',
+      'img.gb_L', // Common avatar image class
+      'button[data-test-id="user-menu-button"]' // AI Studio sometimes
+    ];
+
+    let avatar: Element | null = null;
+    for (const sel of selectors) {
+      avatar = document.querySelector(sel);
+      if (avatar) break;
+    }
+
+    // Fallback: Fixed position in top right if avatar not found
+    if (!avatar) {
+      const top = 80; // Approximate header height
+      const right = 20;
+      this.ui.timelineBar.style.top = `${top}px`;
+      this.ui.timelineBar.style.left = '';
+      this.ui.timelineBar.style.right = `${right}px`;
+      return;
+    }
+
+    const rect = avatar.getBoundingClientRect();
+    const barWidth = this.ui.timelineBar.offsetWidth || 40;
+
+    // Position exactly below the avatar, centered horizontally relative to avatar
+    const top = rect.bottom + 12; // 12px gap
+    const left = rect.left + (rect.width - barWidth) / 2;
+
+    this.ui.timelineBar.style.top = `${top}px`;
+    this.ui.timelineBar.style.left = `${left}px`;
+    this.ui.timelineBar.style.right = ''; // Clear right if set previously
   }
+
+
 
   private computeConversationId(): string {
     const raw = `${location.host}${location.pathname}${location.search}`;
@@ -343,12 +316,12 @@ export class TimelineManager {
       const title = titleElement.textContent?.trim();
       // Filter out generic titles
       if (title &&
-          title !== 'Gemini' &&
-          title !== 'Google Gemini' &&
-          title !== 'Google AI Studio' &&
-          !title.startsWith('Gemini -') &&
-          !title.startsWith('Google AI Studio -') &&
-          title.length > 0) {
+        title !== 'Gemini' &&
+        title !== 'Google Gemini' &&
+        title !== 'Google AI Studio' &&
+        !title.startsWith('Gemini -') &&
+        !title.startsWith('Google AI Studio -') &&
+        title.length > 0) {
         return title;
       }
     }
@@ -410,18 +383,18 @@ export class TimelineManager {
         if (el) {
           try {
             obs.disconnect();
-          } catch {}
+          } catch { }
           resolve(el);
         }
       });
       try {
         obs.observe(document.body, { childList: true, subtree: true });
-      } catch {}
+      } catch { }
       if (timeoutMs > 0) {
         setTimeout(() => {
           try {
             obs.disconnect();
-          } catch {}
+          } catch { }
           resolve(null);
         }, timeoutMs);
       }
@@ -433,7 +406,7 @@ export class TimelineManager {
     let userOverride = '';
     try {
       userOverride = localStorage.getItem('geminiTimelineUserTurnSelector') || '';
-    } catch {}
+    } catch { }
     const defaultCandidates = [
       // Angular-based Gemini UI user bubble (primary)
       '.user-query-bubble-with-background',
@@ -484,13 +457,13 @@ export class TimelineManager {
       if (!userOverride && matchedSelector) {
         try {
           localStorage.setItem('geminiTimelineUserTurnSelectorAuto', matchedSelector);
-        } catch {}
+        } catch { }
       }
       // If a stale user override failed (matchedSelector differs), clear it so we don't keep retrying it
       if (userOverride && matchedSelector && matchedSelector !== userOverride) {
         try {
           localStorage.removeItem('geminiTimelineUserTurnSelector');
-        } catch {}
+        } catch { }
       }
     }
     let p: HTMLElement | null = (firstTurn as HTMLElement) || this.conversationContainer;
@@ -707,7 +680,7 @@ export class TimelineManager {
       id = `u-${hashString(basis)}`;
       try {
         (asEl.dataset as any).turnId = id;
-      } catch {}
+      } catch { }
     }
     return id;
   }
@@ -1019,8 +992,7 @@ export class TimelineManager {
       this.updateTimelineGeometry();
       this.syncTimelineTrackToMain();
       this.updateVirtualRangeAndRender();
-      // Reapply position for responsive design (v2 format only)
-      this.reapplyPosition();
+      this.alignToAvatar();
     };
     window.addEventListener('resize', this.onWindowResize);
     if (window.visualViewport) {
@@ -1028,8 +1000,7 @@ export class TimelineManager {
         this.updateTimelineGeometry();
         this.syncTimelineTrackToMain();
         this.updateVirtualRangeAndRender();
-        // Reapply position for responsive design (v2 format only)
-        this.reapplyPosition();
+        this.alignToAvatar();
       };
       window.visualViewport.addEventListener('resize', this.onVisualViewportResize);
     }
@@ -1038,7 +1009,7 @@ export class TimelineManager {
       if (!this.ui.sliderHandle) return;
       try {
         (this.ui.sliderHandle as any).setPointerCapture(ev.pointerId);
-      } catch {}
+      } catch { }
       this.sliderDragging = true;
       this.showSlider();
       this.sliderStartClientY = ev.clientY;
@@ -1060,20 +1031,7 @@ export class TimelineManager {
     this.ui.slider?.addEventListener('pointerenter', this.onSliderEnter);
     this.ui.slider?.addEventListener('pointerleave', this.onSliderLeave);
 
-    this.onBarPointerDown = (ev: PointerEvent) => {
-      if ((ev.target as HTMLElement).closest('.timeline-dot, .timeline-thumb')) {
-        return;
-      }
-      this.barDragging = true;
-      this.barStartPos = { x: ev.clientX, y: ev.clientY };
-      const rect = this.ui.timelineBar!.getBoundingClientRect();
-      this.barStartOffset = { x: rect.left, y: rect.top };
-      this.ui.timelineBar!.setPointerCapture(ev.pointerId);
-      this.onBarPointerMove = (e: PointerEvent) => this.handleBarDrag(e);
-      this.onBarPointerUp = (e: PointerEvent) => this.endBarDrag(e);
-      window.addEventListener('pointermove', this.onBarPointerMove);
-      window.addEventListener('pointerup', this.onBarPointerUp, { once: true });
-    };
+
 
     this.onStorage = (e: StorageEvent) => {
       if (!e || e.storageArea !== localStorage) return;
@@ -1720,98 +1678,13 @@ export class TimelineManager {
     this.sliderDragging = false;
     try {
       window.removeEventListener('pointermove', this.onSliderMove!);
-    } catch {}
+    } catch { }
     this.onSliderMove = null;
     this.onSliderUp = null;
     this.hideSliderDeferred();
   }
 
-  private toggleDraggable(enabled: boolean): void {
-    this.draggable = enabled;
-    if (this.draggable) {
-      this.ui.timelineBar!.addEventListener('pointerdown', this.onBarPointerDown!);
-      this.ui.timelineBar!.style.cursor = 'move';
-    } else {
-      this.ui.timelineBar!.removeEventListener('pointerdown', this.onBarPointerDown!);
-      this.ui.timelineBar!.style.cursor = 'default';
-    }
-  }
 
-  private handleBarDrag(e: PointerEvent): void {
-    if (!this.barDragging) return;
-    const dx = e.clientX - this.barStartPos.x;
-    const dy = e.clientY - this.barStartPos.y;
-    this.ui.timelineBar!.style.left = `${this.barStartOffset.x + dx}px`;
-    this.ui.timelineBar!.style.top = `${this.barStartOffset.y + dy}px`;
-  }
-
-  private endBarDrag(_e: PointerEvent): void {
-    this.barDragging = false;
-    this.savePosition();
-    window.removeEventListener('pointermove', this.onBarPointerMove!);
-  }
-
-  private savePosition(): void {
-    if (!this.ui.timelineBar) return;
-    const rect = this.ui.timelineBar.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Save position as percentage of viewport for responsive design
-    const position = {
-      version: 2,
-      topPercent: (rect.top / viewportHeight) * 100,
-      leftPercent: (rect.left / viewportWidth) * 100,
-    };
-
-    chrome.storage.sync.set({ geminiTimelinePosition: position });
-  }
-
-  /**
-   * Apply position with boundary checks to keep timeline visible
-   */
-  private applyPosition(top: number, left: number): void {
-    if (!this.ui.timelineBar) return;
-
-    const barWidth = this.ui.timelineBar.offsetWidth || 24; // fallback to default width
-    const barHeight = this.ui.timelineBar.offsetHeight || 100;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    // Clamp to viewport bounds (with small padding)
-    const padding = 10;
-    const clampedTop = Math.max(padding, Math.min(top, viewportHeight - barHeight - padding));
-    const clampedLeft = Math.max(padding, Math.min(left, viewportWidth - barWidth - padding));
-
-    this.ui.timelineBar.style.top = `${clampedTop}px`;
-    this.ui.timelineBar.style.left = `${clampedLeft}px`;
-  }
-
-  /**
-   * Reapply position from storage (for window resize)
-   */
-  private reapplyPosition(): void {
-    if (!this.ui.timelineBar) return;
-
-    chrome.storage.sync.get(['geminiTimelinePosition'], (res: any) => {
-      const position = res?.geminiTimelinePosition;
-      if (!position) return;
-
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // v2 format: use percentage (responsive)
-      if (position.version === 2 && position.topPercent !== undefined && position.leftPercent !== undefined) {
-        const top = (position.topPercent / 100) * viewportHeight;
-        const left = (position.leftPercent / 100) * viewportWidth;
-        this.applyPosition(top, left);
-      }
-      // v1 format: keep absolute position (no resize adjustment for legacy)
-      else if (position.top !== undefined && position.left !== undefined) {
-        this.applyPosition(position.top, position.left);
-      }
-    });
-  }
 
   private hideTooltip(immediate = false): void {
     if (!this.ui.tooltip) return;
@@ -2121,102 +1994,102 @@ export class TimelineManager {
     // Ensure draggable listeners are removed
     try {
       this.toggleDraggable(false);
-    } catch {}
+    } catch { }
     // Also remove any in-flight drag listeners
     try {
       if (this.onBarPointerMove) window.removeEventListener('pointermove', this.onBarPointerMove);
-    } catch {}
+    } catch { }
     try {
       if (this.onBarPointerUp) window.removeEventListener('pointerup', this.onBarPointerUp);
-    } catch {}
+    } catch { }
     try {
       this.mutationObserver?.disconnect();
-    } catch {}
+    } catch { }
     try {
       this.resizeObserver?.disconnect();
-    } catch {}
+    } catch { }
     try {
       this.intersectionObserver?.disconnect();
-    } catch {}
+    } catch { }
     this.visibleUserTurns.clear();
     if (this.ui.timelineBar && this.onTimelineBarClick) {
       try {
         this.ui.timelineBar.removeEventListener('click', this.onTimelineBarClick);
-      } catch {}
+      } catch { }
     }
     try {
       window.removeEventListener('storage', this.onStorage!);
-    } catch {}
+    } catch { }
     if (this.onChromeStorageChanged && typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
       try {
         chrome.storage.onChanged.removeListener(this.onChromeStorageChanged);
-      } catch {}
+      } catch { }
       this.onChromeStorageChanged = null;
     }
     try {
       this.ui.timelineBar?.removeEventListener('pointerdown', this.onPointerDown!);
-    } catch {}
+    } catch { }
     try {
       window.removeEventListener('pointermove', this.onPointerMove!);
-    } catch {}
+    } catch { }
     try {
       window.removeEventListener('pointerup', this.onPointerUp!);
-    } catch {}
+    } catch { }
     try {
       window.removeEventListener('pointercancel', this.onPointerCancel!);
-    } catch {}
+    } catch { }
     try {
       this.ui.timelineBar?.removeEventListener('pointerleave', this.onPointerLeave!);
-    } catch {}
+    } catch { }
     if (this.scrollContainer && this.onScroll) {
       try {
         this.scrollContainer.removeEventListener('scroll', this.onScroll);
-      } catch {}
+      } catch { }
     }
     if (this.ui.timelineBar) {
       try {
         this.ui.timelineBar.removeEventListener('wheel', this.onTimelineWheel!);
-      } catch {}
+      } catch { }
       try {
         this.ui.timelineBar.removeEventListener('pointerenter', this.onBarEnter!);
-      } catch {}
+      } catch { }
       try {
         this.ui.timelineBar.removeEventListener('pointerleave', this.onBarLeave!);
-      } catch {}
+      } catch { }
       try {
         this.ui.slider?.removeEventListener('pointerenter', this.onSliderEnter!);
-      } catch {}
+      } catch { }
       try {
         this.ui.slider?.removeEventListener('pointerleave', this.onSliderLeave!);
-      } catch {}
+      } catch { }
     }
     try {
       this.ui.sliderHandle?.removeEventListener('pointerdown', this.onSliderDown!);
-    } catch {}
+    } catch { }
     try {
       window.removeEventListener('resize', this.onWindowResize!);
-    } catch {}
+    } catch { }
     if (this.onVisualViewportResize && window.visualViewport) {
       try {
         window.visualViewport.removeEventListener('resize', this.onVisualViewportResize);
-      } catch {}
+      } catch { }
       this.onVisualViewportResize = null;
     }
     if (this.scrollRafId !== null) {
       try {
         cancelAnimationFrame(this.scrollRafId);
-      } catch {}
+      } catch { }
       this.scrollRafId = null;
     }
     try {
       this.ui.timelineBar?.remove();
-    } catch {}
+    } catch { }
     try {
       this.ui.tooltip?.remove();
-    } catch {}
+    } catch { }
     try {
       this.measureEl?.remove();
-    } catch {}
+    } catch { }
     try {
       if (this.ui.slider) {
         this.ui.slider.style.pointerEvents = 'none';
@@ -2227,7 +2100,7 @@ export class TimelineManager {
         (stray as HTMLElement).style.pointerEvents = 'none';
         stray.remove();
       }
-    } catch {}
+    } catch { }
     this.ui.slider = null;
     this.ui.sliderHandle = null;
     this.ui = { timelineBar: null, tooltip: null } as any;
@@ -2252,7 +2125,7 @@ export class TimelineManager {
         (window as any).cancelIdleCallback(this.resizeIdleRICId);
         this.resizeIdleRICId = null;
       }
-    } catch {}
+    } catch { }
     if (this.sliderFadeTimer) {
       clearTimeout(this.sliderFadeTimer);
       this.sliderFadeTimer = null;

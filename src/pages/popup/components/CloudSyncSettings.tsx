@@ -118,14 +118,13 @@ export function CloudSyncSettings() {
                 setSyncState(authResponse.state);
             }
 
-            // Get current folder and prompt data from chrome.storage.local first, fallback to localStorage
+            // Get current folder data from chrome.storage.local first, fallback to localStorage
             // Note: localStorage in popup is isolated from content script localStorage on different origins
-            let folders = { folders: [], folderContents: {} };
-            let prompts: any[] = [];
+            let folders: any = { folders: [], folderContents: {} };
 
             try {
                 // Try chrome.storage.local first (used by Safari and for sync data)
-                const storageResult = await chrome.storage.local.get(['gvFolderData', 'gvPromptItems']);
+                const storageResult = await chrome.storage.local.get(['gvFolderData']);
 
                 if (storageResult.gvFolderData) {
                     folders = storageResult.gvFolderData;
@@ -138,27 +137,16 @@ export function CloudSyncSettings() {
                         console.log('[CloudSyncSettings] Loaded folders from localStorage:', folders);
                     }
                 }
-
-                if (storageResult.gvPromptItems) {
-                    prompts = storageResult.gvPromptItems;
-                    console.log('[CloudSyncSettings] Loaded prompts from chrome.storage.local:', prompts.length, 'items');
-                } else {
-                    const promptsStr = localStorage.getItem('gvPromptItems');
-                    if (promptsStr) {
-                        prompts = JSON.parse(promptsStr);
-                        console.log('[CloudSyncSettings] Loaded prompts from localStorage:', prompts.length, 'items');
-                    }
-                }
             } catch (err) {
                 console.error('[CloudSyncSettings] Error loading data:', err);
             }
 
-            console.log('[CloudSyncSettings] Uploading folders:', folders.folders?.length || 0, 'prompts:', prompts.length);
+            console.log('[CloudSyncSettings] Uploading folders:', folders.folders?.length || 0);
 
             // Upload to Google Drive
             const response = await chrome.runtime.sendMessage({
                 type: 'gv.sync.upload',
-                payload: { folders, prompts },
+                payload: { folders },
             });
 
             if (response?.ok) {
@@ -205,15 +193,14 @@ export function CloudSyncSettings() {
             }
 
             // Save to chrome.storage.local
-            // SyncData contains FolderExportPayload.data and PromptExportPayload.items
-            const { folders, prompts } = response.data;
+            // Save to chrome.storage.local
+            // SyncData contains FolderExportPayload.data
+            const { folders } = response.data;
             const folderData = folders?.data || { folders: [], folderContents: {} };
-            const promptItems = prompts?.items || [];
-            console.log('[CloudSyncSettings] Downloaded folders:', folderData.folders?.length || 0, 'prompts:', promptItems.length);
+            console.log('[CloudSyncSettings] Downloaded folders:', folderData.folders?.length || 0);
 
             await chrome.storage.local.set({
                 gvFolderData: folderData,
-                gvPromptItems: promptItems,
             });
 
             // Notify content script to reload folders

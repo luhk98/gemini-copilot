@@ -1,17 +1,9 @@
-import { startChatWidthAdjuster } from './chatWidth/index';
 import { startDeepResearchExport } from './deepResearch/index';
-import { startEditInputWidthAdjuster } from './editInputWidth/index';
 import { startExportButton } from './export/index';
 import { startAIStudioFolderManager } from './folder/aistudio';
 import { startFolderManager } from './folder/index';
-import { initKaTeXConfig } from './katexConfig';
-import { startPromptManager } from './prompt/index';
-import { startSidebarWidthAdjuster } from './sidebarWidth';
 import { startTimeline } from './timeline/index';
 import { startWatermarkRemover } from './watermarkRemover/index';
-
-
-import { startFormulaCopy } from '@/features/formulaCopy';
 
 
 /**
@@ -34,39 +26,8 @@ const BACKGROUND_TAB_MAX_DELAY = 8000; // Maximum delay for background tabs (300
 let initialized = false;
 let initializationTimer: number | null = null;
 let folderManagerInstance: Awaited<ReturnType<typeof startFolderManager>> | null = null;
-let promptManagerInstance: Awaited<ReturnType<typeof startPromptManager>> | null = null;
 
-/**
- * Check if current hostname matches any custom websites
- */
-async function isCustomWebsite(): Promise<boolean> {
-  try {
-    const result = await chrome.storage?.sync?.get({ gvPromptCustomWebsites: [] });
-    const customWebsites = Array.isArray(result?.gvPromptCustomWebsites) ? result.gvPromptCustomWebsites : [];
 
-    // Normalize current hostname
-    const currentHost = location.hostname.toLowerCase().replace(/^www\./, '');
-
-    console.log('[Gemini Voyager] Checking custom websites:', {
-      currentHost,
-      customWebsites,
-      hostname: location.hostname
-    });
-
-    const isCustom = customWebsites.some((website: string) => {
-      const normalizedWebsite = website.toLowerCase().replace(/^www\./, '');
-      const matches = currentHost === normalizedWebsite || currentHost.endsWith('.' + normalizedWebsite);
-      console.log('[Gemini Voyager] Comparing:', { currentHost, normalizedWebsite, matches });
-      return matches;
-    });
-
-    console.log('[Gemini Voyager] Is custom website:', isCustom);
-    return isCustom;
-  } catch (e) {
-    console.error('[Gemini Voyager] Error checking custom websites:', e);
-    return false;
-  }
-}
 
 /**
  * Initialize all features sequentially to reduce simultaneous load
@@ -80,19 +41,6 @@ async function initializeFeatures(): Promise<void> {
     // to further reduce simultaneous resource usage
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    // Check if this is a custom website (only prompt manager should be enabled)
-    const isCustomSite = await isCustomWebsite();
-
-    if (isCustomSite) {
-      // Only start prompt manager for custom websites
-      console.log('[Gemini Voyager] Custom website detected, starting Prompt Manager only');
-
-      promptManagerInstance = await startPromptManager();
-      return;
-    }
-
-    console.log('[Gemini Voyager] Not a custom website, checking for Gemini/AI Studio');
-
     if (location.hostname === 'gemini.google.com') {
       // Timeline is most resource-intensive, start it first
       startTimeline();
@@ -101,18 +49,6 @@ async function initializeFeatures(): Promise<void> {
       folderManagerInstance = await startFolderManager();
       await delay(HEAVY_FEATURE_INIT_DELAY);
 
-      startChatWidthAdjuster();
-      await delay(LIGHT_FEATURE_INIT_DELAY);
-
-      startEditInputWidthAdjuster();
-      await delay(LIGHT_FEATURE_INIT_DELAY);
-
-      startSidebarWidthAdjuster();
-      await delay(LIGHT_FEATURE_INIT_DELAY);
-
-      startFormulaCopy();
-      await delay(LIGHT_FEATURE_INIT_DELAY);
-
       // Watermark remover - based on gemini-watermark-remover by journey-ad
       // https://github.com/journey-ad/gemini-watermark-remover
       startWatermarkRemover();
@@ -120,15 +56,6 @@ async function initializeFeatures(): Promise<void> {
 
       startDeepResearchExport();
       await delay(LIGHT_FEATURE_INIT_DELAY);
-    }
-
-    if (
-      location.hostname === 'gemini.google.com' ||
-      location.hostname === 'aistudio.google.com' ||
-      location.hostname === 'aistudio.google.cn'
-    ) {
-      promptManagerInstance = await startPromptManager();
-      await delay(HEAVY_FEATURE_INIT_DELAY);
     }
 
     if (location.hostname === 'aistudio.google.com' || location.hostname === 'aistudio.google.cn') {
@@ -188,34 +115,9 @@ function handleVisibilityChange(): void {
       hostname.includes('aistudio.google.com') ||
       hostname.includes('aistudio.google.cn');
 
-    // Initialize KaTeX configuration early to suppress Unicode warnings
-    // This must run before any formulas are rendered on the page
-    if (isSupportedSite) {
-      initKaTeXConfig();
-    }
 
-    // If not a known site, check if it's a custom website (async)
-    if (!isSupportedSite) {
-      // For unknown sites, check storage asynchronously
-      chrome.storage?.sync?.get({ gvPromptCustomWebsites: [] }, (result) => {
-        const customWebsites = Array.isArray(result?.gvPromptCustomWebsites) ? result.gvPromptCustomWebsites : [];
-        const currentHost = hostname.replace(/^www\./, '');
 
-        const isCustomSite = customWebsites.some((website: string) => {
-          const normalizedWebsite = website.toLowerCase().replace(/^www\./, '');
-          return currentHost === normalizedWebsite || currentHost.endsWith('.' + normalizedWebsite);
-        });
 
-        if (isCustomSite) {
-          console.log('[Gemini Voyager] Custom website detected:', hostname);
-          initializeFeatures();
-        } else {
-          // Not a supported site, exit early
-          console.log('[Gemini Voyager] Not a supported website, skipping initialization');
-        }
-      });
-      return;
-    }
 
     const delay = getInitializationDelay();
 
@@ -239,10 +141,6 @@ function handleVisibilityChange(): void {
         if (folderManagerInstance) {
           folderManagerInstance.destroy();
           folderManagerInstance = null;
-        }
-        if (promptManagerInstance) {
-          promptManagerInstance.destroy();
-          promptManagerInstance = null;
         }
       } catch (e) {
         console.error('[Gemini Voyager] Cleanup error:', e);

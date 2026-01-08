@@ -28,10 +28,10 @@ Gemini Voyager is a cross-browser extension that enhances the Google Gemini AI c
 
 - **Timeline Navigation**: Visual conversation timeline with clickable nodes, scroll-sync, and starred messages
 - **Folder Organization**: Two-level drag-and-drop folder system for conversation management
-- **Prompt Library**: Tag-based prompt management with import/export
+
 - **Chat Export**: Export conversations to JSON, Markdown, or PDF with asset packaging
-- **Formula Copy**: One-click LaTeX/KaTeX formula source copying
-- **UI Customization**: Adjustable chat width, sidebar width, dark mode, multi-language support (EN/ZH)
+
+- **UI Customization**: Dark mode, multi-language support (EN/ZH)
 - **Auto-Backup**: Automatic timestamped backups with File System Access API or JSZip fallback
 
 ### Tech Stack
@@ -68,11 +68,9 @@ gemini-voyager/
 │   │   ├── content/              # Content scripts (main features)
 │   │   │   ├── timeline/         # Timeline navigation
 │   │   │   ├── folder/           # Folder organization
-│   │   │   ├── prompt/           # Prompt library
-│   │   │   ├── chatWidth/        # Chat width adjuster
-│   │   │   ├── sidebarWidth/     # Sidebar width adjuster
-│   │   │   ├── editInputWidth/   # Edit input width adjuster
-│   │   │   └── formulaCopy/      # LaTeX formula copying
+
+
+
 │   │   ├── popup/                # Extension popup UI
 │   │   ├── options/              # Options page (placeholder)
 │   │   ├── panel/                # Side panel (placeholder)
@@ -85,7 +83,6 @@ gemini-voyager/
 │   ├── features/                 # Shared feature modules
 │   │   ├── export/               # Chat export (JSON, MD, PDF)
 │   │   ├── folder/               # Folder system logic
-│   │   ├── formulaCopy/          # Formula copy logic
 │   │   └── backup/               # Auto-backup with File System API
 │   ├── components/               # React UI components
 │   │   └── ui/                   # Reusable primitives (Button, Card, etc.)
@@ -114,17 +111,17 @@ gemini-voyager/
 
 ### Key Directories Explained
 
-| Directory | Purpose | When to Modify |
-|-----------|---------|----------------|
-| `src/pages/content/` | Content scripts injected into Gemini/AI Studio | Adding/modifying features visible on the Gemini site |
-| `src/core/services/` | Business logic services (storage, logging, DOM, backup, monitoring) | Changing storage strategy, logging behavior, backup mechanism, quota monitoring |
-| `src/core/types/` | TypeScript type definitions | Adding new data structures |
-| `src/features/export/` | Multi-format export functionality | Changing export formats or behavior |
-| `src/features/backup/` | Auto-backup with File System API/JSZip fallback | Changing backup strategy, adding backup targets |
-| `src/components/ui/` | Reusable UI components | Adding new UI primitives |
-| `src/hooks/` | Custom React hooks | Adding reusable stateful logic |
-| `src/locales/` | Translation files | Adding new languages or updating text |
-| `public/` | Static assets (icons, CSS) | Updating extension icons or global styles |
+| Directory              | Purpose                                                             | When to Modify                                                                  |
+| ---------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `src/pages/content/`   | Content scripts injected into Gemini/AI Studio                      | Adding/modifying features visible on the Gemini site                            |
+| `src/core/services/`   | Business logic services (storage, logging, DOM, backup, monitoring) | Changing storage strategy, logging behavior, backup mechanism, quota monitoring |
+| `src/core/types/`      | TypeScript type definitions                                         | Adding new data structures                                                      |
+| `src/features/export/` | Multi-format export functionality                                   | Changing export formats or behavior                                             |
+| `src/features/backup/` | Auto-backup with File System API/JSZip fallback                     | Changing backup strategy, adding backup targets                                 |
+| `src/components/ui/`   | Reusable UI components                                              | Adding new UI primitives                                                        |
+| `src/hooks/`           | Custom React hooks                                                  | Adding reusable stateful logic                                                  |
+| `src/locales/`         | Translation files                                                   | Adding new languages or updating text                                           |
+| `public/`              | Static assets (icons, CSS)                                          | Updating extension icons or global styles                                       |
 
 ---
 
@@ -147,7 +144,7 @@ gemini-voyager/
 
 4. **Observer Pattern**
    - `MutationObserver` for DOM change detection
-   - Used in timeline, folder manager, and formula copy features
+   - Used in timeline and folder manager features
 
 5. **Singleton Pattern**
    - Logger and Storage services
@@ -223,15 +220,11 @@ const storage = await createStorageService(); // Auto-selects implementation
 - `TIMELINE_HIDE_CONTAINER` (`geminiTimelineHideContainer`) - Timeline visibility setting
 - `TIMELINE_DRAGGABLE` (`geminiTimelineDraggable`) - Timeline draggable state
 - `TIMELINE_POSITION` (`geminiTimelinePosition`) - Timeline position coordinates
-- `CHAT_WIDTH` (`geminiChatWidth`) - Chat container width
-- `PROMPT_ITEMS` (`gvPromptItems`) - Prompt library data
-- `PROMPT_PANEL_LOCKED` (`gvPromptPanelLocked`) - Prompt panel lock state
-- `PROMPT_PANEL_POSITION` (`gvPromptPanelPosition`) - Prompt panel position
-- `PROMPT_TRIGGER_POSITION` (`gvPromptTriggerPosition`) - Prompt trigger position
+
+
 - `LANGUAGE` (`language`) - UI language preference
 
 **Note**: Some features still use storage keys not in the central `StorageKeys` object:
-- Sidebar Width: `geminiSidebarWidth` (not centralized yet)
 - Backup Service: `gvBackupConfig` (defined in `src/features/backup/types/backup.ts`)
 
 **Data Protection Features**:
@@ -297,9 +290,7 @@ bun run build:all        # All browsers
 ```
 
 **Output directories**:
-- Chrome: `dist_chrome/`
-- Firefox: `dist_firefox/`
-- Safari: `dist_safari/`
+- Chrome: `dist/`
 
 ### Development Mode
 
@@ -333,15 +324,15 @@ Uses **Nodemon** for hot reload:
 
 #### Files & Directories
 
-| Pattern | Purpose | Example |
-|---------|---------|---------|
-| `*Service.ts` | Business logic services | `StorageService.ts` |
-| `*Manager.ts` | DOM manipulation managers | `FolderManager.ts` |
-| `use*.ts` | React hooks | `useDarkMode.ts` |
-| `*Context.tsx` | React context providers | `LanguageContext.tsx` |
-| `index.ts` | Module entry points | `src/pages/content/index.tsx` |
-| `*.test.ts` | Test files | `StorageService.test.ts` |
-| `types.ts` | Type definition files | `src/core/types/common.ts` |
+| Pattern        | Purpose                   | Example                       |
+| -------------- | ------------------------- | ----------------------------- |
+| `*Service.ts`  | Business logic services   | `StorageService.ts`           |
+| `*Manager.ts`  | DOM manipulation managers | `FolderManager.ts`            |
+| `use*.ts`      | React hooks               | `useDarkMode.ts`              |
+| `*Context.tsx` | React context providers   | `LanguageContext.tsx`         |
+| `index.ts`     | Module entry points       | `src/pages/content/index.tsx` |
+| `*.test.ts`    | Test files                | `StorageService.test.ts`      |
+| `types.ts`     | Type definition files     | `src/core/types/common.ts`    |
 
 #### CSS Classes
 
@@ -350,7 +341,7 @@ Uses **Nodemon** for hot reload:
 ```css
 .gv-hidden              /* Utility classes */
 .gv-locked              /* State classes */
-.gv-pm-*                /* Prompt manager (pm) components */
+
 .gemini-timeline-*      /* Timeline components */
 ```
 
@@ -738,7 +729,7 @@ The backup service (`src/features/backup/`) provides automatic timestamped backu
 **Key Features**:
 - Automatic backups at configurable intervals
 - Manual backup triggering
-- Backs up prompts and folder data
+- Backs up folder data
 - JSZip fallback for browsers without File System Access API support
 
 **Example Usage**:
@@ -799,58 +790,58 @@ For manifest differences, use separate configs:
 
 ### Configuration Files
 
-| File | Purpose | When to Modify |
-|------|---------|----------------|
-| `manifest.json` | Production extension manifest (MV3) | Adding permissions, content scripts, icons |
-| `manifest.dev.json` | Development manifest overrides | Adding dev-only features |
-| `package.json` | Dependencies, scripts, metadata | Adding packages, changing scripts |
-| `tsconfig.json` | TypeScript compiler options | Adding path aliases, changing target |
-| `vite.config.*.ts` | Build configuration per browser | Changing build output, plugins |
-| `vitest.config.ts` | Testing configuration | Changing test environment, coverage |
-| `eslint.config.js` | Linting rules | Adding/modifying lint rules |
-| `.prettierrc` | Code formatting rules | Changing formatting preferences |
+| File                | Purpose                             | When to Modify                             |
+| ------------------- | ----------------------------------- | ------------------------------------------ |
+| `manifest.json`     | Production extension manifest (MV3) | Adding permissions, content scripts, icons |
+| `manifest.dev.json` | Development manifest overrides      | Adding dev-only features                   |
+| `package.json`      | Dependencies, scripts, metadata     | Adding packages, changing scripts          |
+| `tsconfig.json`     | TypeScript compiler options         | Adding path aliases, changing target       |
+| `vite.config.*.ts`  | Build configuration per browser     | Changing build output, plugins             |
+| `vitest.config.ts`  | Testing configuration               | Changing test environment, coverage        |
+| `eslint.config.js`  | Linting rules                       | Adding/modifying lint rules                |
+| `.prettierrc`       | Code formatting rules               | Changing formatting preferences            |
 
 ### Core Source Files
 
-| File | Purpose | Key Exports |
-|------|---------|-------------|
-| `src/pages/content/index.tsx` | Content script orchestrator | Feature initialization |
-| `src/core/services/StorageService.ts` | Storage abstraction with sync/local support | `createStorageService()`, `ChromeLocalStorageService` |
-| `src/core/services/DataBackupService.ts` | Multi-layer localStorage backup system | `DataBackupService`, backup/recovery methods |
-| `src/core/services/StorageMonitor.ts` | Storage quota monitoring with warnings | `StorageMonitor`, `startMonitoring()` |
-| `src/core/services/LoggerService.ts` | Centralized logging | `logger.info()`, `logger.error()` |
-| `src/core/types/common.ts` | Shared type definitions and storage keys | Brand types, `StorageKeys` object |
-| `src/core/utils/storageMigration.ts` | Auto-migration from localStorage | `migrateToExtensionStorage()` |
-| `src/core/errors/index.ts` | Error classes | `AppError`, `StorageError`, etc. |
-| `src/features/export/ConversationExportService.ts` | Chat export logic | `exportConversation()` |
-| `src/features/backup/services/BackupService.ts` | Auto-backup with File System API | `backupService`, `createBackup()` |
-| `src/features/backup/services/PromptImportExportService.ts` | Prompt backup/restore | Export/import prompt library |
-| `src/pages/popup/Popup.tsx` | Extension popup UI | Main popup component |
-| `src/hooks/useI18n.ts` | Internationalization hook | `useI18n()` |
-| `src/contexts/LanguageContext.tsx` | Language state management | `LanguageProvider`, `useLanguage()` |
+| File                                                        | Purpose                                     | Key Exports                                           |
+| ----------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------- |
+| `src/pages/content/index.tsx`                               | Content script orchestrator                 | Feature initialization                                |
+| `src/core/services/StorageService.ts`                       | Storage abstraction with sync/local support | `createStorageService()`, `ChromeLocalStorageService` |
+| `src/core/services/DataBackupService.ts`                    | Multi-layer localStorage backup system      | `DataBackupService`, backup/recovery methods          |
+| `src/core/services/StorageMonitor.ts`                       | Storage quota monitoring with warnings      | `StorageMonitor`, `startMonitoring()`                 |
+| `src/core/services/LoggerService.ts`                        | Centralized logging                         | `logger.info()`, `logger.error()`                     |
+| `src/core/types/common.ts`                                  | Shared type definitions and storage keys    | Brand types, `StorageKeys` object                     |
+| `src/core/utils/storageMigration.ts`                        | Auto-migration from localStorage            | `migrateToExtensionStorage()`                         |
+| `src/core/errors/index.ts`                                  | Error classes                               | `AppError`, `StorageError`, etc.                      |
+| `src/features/export/ConversationExportService.ts`          | Chat export logic                           | `exportConversation()`                                |
+| `src/features/backup/services/BackupService.ts`             | Auto-backup with File System API            | `backupService`, `createBackup()`                     |
+| `src/features/backup/services/PromptImportExportService.ts` | Prompt backup/restore                       | Export/import prompt library                          |
+| `src/pages/popup/Popup.tsx`                                 | Extension popup UI                          | Main popup component                                  |
+| `src/hooks/useI18n.ts`                                      | Internationalization hook                   | `useI18n()`                                           |
+| `src/contexts/LanguageContext.tsx`                          | Language state management                   | `LanguageProvider`, `useLanguage()`                   |
 
 ### Build & Tooling Files
 
-| File | Purpose |
-|------|---------|
-| `custom-vite-plugins.ts` | Custom Vite plugins (i18n, icon stripping) |
-| `nodemon.*.json` | Hot reload configuration for dev mode |
-| `scripts/build-safari.ts` | Safari-specific build script |
-| `TESTING_GUIDE.md` | Comprehensive testing guide for data loss prevention features |
-| `.github/workflows/` | CI/CD workflows for documentation deployment |
+| File                      | Purpose                                                       |
+| ------------------------- | ------------------------------------------------------------- |
+| `custom-vite-plugins.ts`  | Custom Vite plugins (i18n, icon stripping)                    |
+| `nodemon.*.json`          | Hot reload configuration for dev mode                         |
+| `scripts/build-safari.ts` | Safari-specific build script                                  |
+| `TESTING_GUIDE.md`        | Comprehensive testing guide for data loss prevention features |
+| `.github/workflows/`      | CI/CD workflows for documentation deployment                  |
 
 ### Documentation Files
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | AI assistant guide (this file) |
-| `README.md` | Main user-facing documentation |
-| `TESTING_GUIDE.md` | Testing guide for data protection features |
-| `docs/` | VitePress documentation site |
-| `.github/CONTRIBUTING.md` | Contribution guidelines |
-| `.github/docs/safari/INSTALLATION.md` | Safari installation guide |
-| `.github/docs/IMPORT_EXPORT_GUIDE.md` | Data portability guide |
-| `.github/README_ZH.md` | Chinese documentation |
+| File                                  | Purpose                                    |
+| ------------------------------------- | ------------------------------------------ |
+| `CLAUDE.md`                           | AI assistant guide (this file)             |
+| `README.md`                           | Main user-facing documentation             |
+| `TESTING_GUIDE.md`                    | Testing guide for data protection features |
+| `docs/`                               | VitePress documentation site               |
+| `.github/CONTRIBUTING.md`             | Contribution guidelines                    |
+| `.github/docs/safari/INSTALLATION.md` | Safari installation guide                  |
+| `.github/docs/IMPORT_EXPORT_GUIDE.md` | Data portability guide                     |
+| `.github/README_ZH.md`                | Chinese documentation                      |
 
 ---
 
@@ -868,7 +859,7 @@ For manifest differences, use separate configs:
 cat manifest.json | grep -A 5 "content_scripts"
 
 # Verify Vite build output
-ls -la dist_chrome/src/pages/content/
+ls -la dist/src/pages/content/
 ```
 
 **Solutions**:
@@ -909,7 +900,7 @@ console.log('Loaded data:', data);
 **Solutions**:
 ```bash
 # Clean build artifacts
-rm -rf dist_chrome/ dist_firefox/ dist_safari/
+rm -rf dist/
 
 # Reinstall dependencies
 rm -rf node_modules/ bun.lock
@@ -1011,7 +1002,7 @@ getComputedStyle(document.documentElement).getPropertyValue('--background')
 3. **Minimize Content Script Size**:
    - Use dynamic imports for large features
    - Tree-shake unused code
-   - Check bundle size: `du -h dist_chrome/src/pages/content/index.js`
+   - Check bundle size: `du -h dist/src/pages/content/index.js`
 
 4. **Lazy Load Components**:
    ```typescript

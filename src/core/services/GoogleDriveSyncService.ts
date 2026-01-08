@@ -13,15 +13,12 @@ import type { FolderData } from '@/core/types/folder';
 import type {
     SyncState,
     SyncMode,
-    PromptItem,
     FolderExportPayload,
-    PromptExportPayload,
 } from '@/core/types/sync';
 import { DEFAULT_SYNC_STATE } from '@/core/types/sync';
 import { EXTENSION_VERSION } from '@/core/utils/version';
 
 const FOLDERS_FILE_NAME = 'gemini-voyager-folders.json';
-const PROMPTS_FILE_NAME = 'gemini-voyager-prompts.json';
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
 const DRIVE_UPLOAD_BASE = 'https://www.googleapis.com/upload/drive/v3';
 
@@ -36,7 +33,6 @@ const INITIAL_RETRY_DELAY_MS = 1000;
 export class GoogleDriveSyncService {
     private state: SyncState = { ...DEFAULT_SYNC_STATE };
     private foldersFileId: string | null = null;
-    private promptsFileId: string | null = null;
     private stateChangeCallback: ((state: SyncState) => void) | null = null;
     private accessToken: string | null = null;
     private tokenExpiry: number = 0;
@@ -93,15 +89,14 @@ export class GoogleDriveSyncService {
         }
         await this.clearToken();
         this.foldersFileId = null;
-        this.promptsFileId = null;
         this.updateState({ isAuthenticated: false, lastSyncTime: null, error: null });
         await this.saveState();
     }
 
     /**
-     * Upload folders and prompts as separate files to Google Drive
+     * Upload folders to Google Drive
      */
-    async upload(folders: FolderData, prompts: PromptItem[]): Promise<boolean> {
+    async upload(folders: FolderData): Promise<boolean> {
         try {
             this.updateState({ isSyncing: true, error: null });
 
@@ -120,23 +115,14 @@ export class GoogleDriveSyncService {
                 data: folders,
             };
 
-            // Create prompt payload
-            const promptPayload: PromptExportPayload = {
-                format: 'gemini-voyager.prompts.v1',
-                exportedAt: now.toISOString(),
-                version: EXTENSION_VERSION,
-                items: prompts,
-            };
+
 
             // Upload folders file
             await this.ensureFileId(token, FOLDERS_FILE_NAME, 'folders');
             await this.uploadFileWithRetry(token, this.foldersFileId!, folderPayload);
             console.log('[GoogleDriveSyncService] Folders uploaded successfully');
 
-            // Upload prompts file
-            await this.ensureFileId(token, PROMPTS_FILE_NAME, 'prompts');
-            await this.uploadFileWithRetry(token, this.promptsFileId!, promptPayload);
-            console.log('[GoogleDriveSyncService] Prompts uploaded successfully');
+
 
             const syncTime = Date.now();
             this.updateState({ isSyncing: false, lastSyncTime: syncTime, error: null });
@@ -153,10 +139,10 @@ export class GoogleDriveSyncService {
     }
 
     /**
-     * Download folders and prompts from separate files in Google Drive
-     * Returns { folders, prompts } or null if no files exist
+     * Download folders from separate files in Google Drive
+     * Returns { folders } or null if no files exist
      */
-    async download(): Promise<{ folders: FolderExportPayload | null; prompts: PromptExportPayload | null } | null> {
+    async download(): Promise<{ folders: FolderExportPayload | null } | null> {
         try {
             this.updateState({ isSyncing: true, error: null });
 
@@ -173,15 +159,9 @@ export class GoogleDriveSyncService {
                 console.log('[GoogleDriveSyncService] Folders downloaded');
             }
 
-            // Download prompts file
-            const promptsFileId = await this.findFile(token, PROMPTS_FILE_NAME);
-            let prompts: PromptExportPayload | null = null;
-            if (promptsFileId) {
-                prompts = await this.downloadFileWithRetry(token, promptsFileId);
-                console.log('[GoogleDriveSyncService] Prompts downloaded');
-            }
 
-            if (!folders && !prompts) {
+
+            if (!folders) {
                 console.log('[GoogleDriveSyncService] No sync files found');
                 this.updateState({ isSyncing: false });
                 return null;
@@ -191,7 +171,7 @@ export class GoogleDriveSyncService {
             this.updateState({ isSyncing: false, lastSyncTime: syncTime, error: null });
             await this.saveState();
 
-            return { folders, prompts };
+            return { folders };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Download failed';
             console.error('[GoogleDriveSyncService] Download failed:', error);
@@ -204,7 +184,7 @@ export class GoogleDriveSyncService {
 
     private async loadCachedToken(): Promise<void> {
         try {
-            const result = await chrome.storage.local.get(['gvAccessToken', 'gvTokenExpiry']);
+            const result = (await chrome.storage.local.get(['gvAccessToken', 'gvTokenExpiry'])) as any;
             if (result.gvAccessToken && result.gvTokenExpiry && result.gvTokenExpiry > Date.now()) {
                 this.accessToken = result.gvAccessToken;
                 this.tokenExpiry = result.gvTokenExpiry;
@@ -302,8 +282,8 @@ export class GoogleDriveSyncService {
         return result.files?.[0]?.id || null;
     }
 
-    private async ensureFileId(token: string, fileName: string, type: 'folders' | 'prompts'): Promise<void> {
-        const currentId = type === 'folders' ? this.foldersFileId : this.promptsFileId;
+    private async ensureFileId(token: string, fileName: string, type: 'folders'): Promise<void> {
+        const currentId = this.foldersFileId;
 
         if (currentId) {
             const exists = await this.checkFileExists(token, currentId);
@@ -312,14 +292,12 @@ export class GoogleDriveSyncService {
 
         const existingId = await this.findFile(token, fileName);
         if (existingId) {
-            if (type === 'folders') this.foldersFileId = existingId;
-            else this.promptsFileId = existingId;
+            this.foldersFileId = existingId;
             return;
         }
 
         const newId = await this.createFile(token, fileName);
-        if (type === 'folders') this.foldersFileId = newId;
-        else this.promptsFileId = newId;
+        this.foldersFileId = newId;
     }
 
     private async checkFileExists(token: string, fileId: string): Promise<boolean> {
@@ -391,7 +369,7 @@ export class GoogleDriveSyncService {
 
     private async loadState(): Promise<void> {
         try {
-            const result = await chrome.storage.local.get(['gvSyncMode', 'gvLastSyncTime', 'gvSyncError']);
+            const result = (await chrome.storage.local.get(['gvSyncMode', 'gvLastSyncTime', 'gvSyncError'])) as any;
             this.state = {
                 mode: (result.gvSyncMode as SyncMode) || 'disabled',
                 lastSyncTime: result.gvLastSyncTime || null,

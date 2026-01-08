@@ -51,11 +51,7 @@ export const StorageKeys = {
   CHAT_WIDTH: 'geminiChatWidth',
 
   // Prompt Manager
-  PROMPT_ITEMS: 'gvPromptItems',
-  PROMPT_PANEL_LOCKED: 'gvPromptPanelLocked',
-  PROMPT_PANEL_POSITION: 'gvPromptPanelPosition',
-  PROMPT_TRIGGER_POSITION: 'gvPromptTriggerPosition',
-  PROMPT_CUSTOM_WEBSITES: 'gvPromptCustomWebsites',
+
 
   // Global settings
   LANGUAGE: 'language',

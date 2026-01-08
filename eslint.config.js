@@ -8,8 +8,7 @@ export default [
   {
     ignores: [
       'dist_*',
-      'dist_chrome',
-      'dist_firefox',
+      'dist',
       'node_modules',
       'docs/.vitepress/cache/**',
       'docs/.vitepress/dist/**',

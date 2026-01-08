@@ -29,16 +29,7 @@ export interface SyncState {
     isAuthenticated: boolean;
 }
 
-/**
- * Prompt item structure (mirrored from prompt manager for type safety)
- */
-export interface PromptItem {
-    id: string;
-    text: string;
-    tags: string[];
-    createdAt: number;
-    updatedAt?: number;
-}
+
 
 /**
  * Folder export payload format (matches existing export format)
@@ -50,15 +41,7 @@ export interface FolderExportPayload {
     data: FolderData;
 }
 
-/**
- * Prompt export payload format (matches existing export format)
- */
-export interface PromptExportPayload {
-    format: 'gemini-voyager.prompts.v1';
-    exportedAt: string;
-    version?: string;
-    items: PromptItem[];
-}
+
 
 /**
  * Data payload synced to Google Drive
@@ -71,8 +54,6 @@ export interface SyncData {
     format: 'gemini-voyager.sync.v1';
     /** Folder data in export format */
     folders: FolderExportPayload;
-    /** Prompt data in export format */
-    prompts: PromptExportPayload;
     /** Timestamp when this data was synced */
     syncedAt: number;
 }

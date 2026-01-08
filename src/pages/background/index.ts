@@ -3,7 +3,7 @@
 import { googleDriveSyncService } from '@/core/services/GoogleDriveSyncService';
 import { StorageKeys } from '@/core/types/common';
 import type { FolderData } from '@/core/types/folder';
-import type { SyncMode, SyncData, PromptItem } from '@/core/types/sync';
+import type { SyncMode, SyncData } from '@/core/types/sync';
 import type { StarredMessage, StarredMessagesData } from '@/pages/content/timeline/starredTypes';
 
 /**
@@ -155,11 +155,10 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             return;
           }
           case 'gv.sync.upload': {
-            const { folders, prompts } = message.payload as {
+            const { folders } = message.payload as {
               folders: FolderData;
-              prompts: PromptItem[];
             };
-            const success = await googleDriveSyncService.upload(folders, prompts);
+            const success = await googleDriveSyncService.upload(folders);
             sendResponse({ ok: success, state: await googleDriveSyncService.getState() });
             return;
           }
@@ -168,13 +167,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
             // Automatically save downloaded data to chrome.storage.local
             // This triggers storage change listeners to refresh UI
             if (data) {
+
               const folderData = data.folders?.data || { folders: [], folderContents: {} };
-              const promptItems = data.prompts?.items || [];
               await chrome.storage.local.set({
                 gvFolderData: folderData,
-                gvPromptItems: promptItems,
               });
-              console.log('[Background] Downloaded data saved to storage, folders:', folderData.folders?.length || 0, 'prompts:', promptItems.length);
+              console.log('[Background] Downloaded data saved to storage, folders:', folderData.folders?.length || 0);
             }
             sendResponse({
               ok: true,

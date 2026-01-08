@@ -5,7 +5,7 @@ import { mergeConfig, defineConfig } from 'vite';
 
 import baseConfig, { baseManifest, baseBuildOptions } from './vite.config.base';
 
-const outDir = resolve(__dirname, 'dist_chrome');
+const outDir = resolve(__dirname, 'dist');
 
 export default mergeConfig(
   baseConfig,
