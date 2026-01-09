@@ -26,7 +26,7 @@
 
 Gemini Voyager is a cross-browser extension that enhances the Google Gemini AI chat experience with:
 
-- **Timeline Navigation**: Visual conversation timeline with clickable nodes, scroll-sync, and starred messages
+- **Timeline Navigation**: Visual conversation timeline with clickable nodes and scroll-sync
 - **Folder Organization**: Two-level drag-and-drop folder system for conversation management
 
 - **Chat Export**: Export conversations to JSON, Markdown, or PDF with asset packaging
@@ -216,10 +216,7 @@ const storage = await createStorageService(); // Auto-selects implementation
 **Storage Keys**: Centralized in `src/core/types/common.ts` (`StorageKeys` object)
 - `FOLDER_DATA` (`gvFolderData`) - Folder structure (Gemini)
 - `FOLDER_DATA_AISTUDIO` (`gvFolderDataAIStudio`) - Folder structure (AI Studio)
-- `TIMELINE_SCROLL_MODE` (`geminiTimelineScrollMode`) - Timeline scroll mode setting
-- `TIMELINE_HIDE_CONTAINER` (`geminiTimelineHideContainer`) - Timeline visibility setting
-- `TIMELINE_DRAGGABLE` (`geminiTimelineDraggable`) - Timeline draggable state
-- `TIMELINE_POSITION` (`geminiTimelinePosition`) - Timeline position coordinates
+
 
 
 - `LANGUAGE` (`language`) - UI language preference

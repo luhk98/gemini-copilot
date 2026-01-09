@@ -1,7 +1,4 @@
-
 import { eventBus } from './EventBus';
-import { StarredMessagesService } from './StarredMessagesService';
-import type { StarredMessage, StarredMessagesData } from './starredTypes';
 import { DotElement } from './types';
 
 import { keyboardShortcutService } from '@/core/services/KeyboardShortcutService';
@@ -48,6 +45,7 @@ export class TimelineManager {
   private onScroll: (() => void) | null = null;
   private onTimelineWheel: ((e: WheelEvent) => void) | null = null;
   private onWindowResize: (() => void) | null = null;
+  // private onTimelineBarOver: ((e: MouseEvent) => void) | null = null; // Removed hover tooltip for now if only for summary? No, keep hover for summary.
   private onTimelineBarOver: ((e: MouseEvent) => void) | null = null;
   private onTimelineBarOut: ((e: MouseEvent) => void) | null = null;
   private scrollRafId: number | null = null;
@@ -56,7 +54,7 @@ export class TimelineManager {
   private pendingActiveId: string | null = null;
   private activeChangeTimer: number | null = null;
   private tooltipHideDelay = 100;
-  private scrollMode: 'flow' = 'flow';
+  // Fixed scroll mode to 'flow'
   private runnerRing: HTMLElement | null = null;
   private flowAnimating = false;
   private tooltipHideTimer: number | null = null;
@@ -71,9 +69,6 @@ export class TimelineManager {
   private firstUserTurnOffset = 0;
   private contentSpanPx = 1;
   private usePixelTop = false;
-  private _cssVarTopSupported: boolean | null = null;
-  private sliderDragging = false;
-  private sliderFadeTimer: number | null = null;
   private sliderFadeDelay = 1000;
   private sliderAlwaysVisible = false;
   private onSliderDown: ((ev: PointerEvent) => void) | null = null;
@@ -91,7 +86,6 @@ export class TimelineManager {
   private onChromeStorageChanged:
     | ((changes: Record<string, chrome.storage.StorageChange>, areaName: string) => void)
     | null = null;
-  private starred: Set<string> = new Set();
   private markerMap: Map<
     string,
     {
@@ -106,24 +100,16 @@ export class TimelineManager {
   > = new Map();
   private conversationId: string | null = null;
   private userTurnSelector: string = '';
-  private onPointerDown: ((ev: PointerEvent) => void) | null = null;
-  private onPointerMove: ((ev: PointerEvent) => void) | null = null;
-  private onPointerUp: ((ev: PointerEvent) => void) | null = null;
-  private onPointerCancel: ((ev: PointerEvent) => void) | null = null;
-  private onPointerLeave: ((ev: PointerEvent) => void) | null = null;
-  private pressTargetDot: DotElement | null = null;
-  private pressStartPos: { x: number; y: number } | null = null;
-  private longPressTimer: number | null = null;
-  private longPressTriggered = false;
-  private suppressClickUntil = 0;
-  private longPressDuration = 550;
-  private longPressMoveTolerance = 6;
+  private _cssVarTopSupported: boolean | null = null;
+  private sliderDragging = false;
+  private sliderFadeTimer: number | null = null;
   private onBarEnter: (() => void) | null = null;
   private onBarLeave: (() => void) | null = null;
   private onSliderEnter: (() => void) | null = null;
   private onSliderLeave: (() => void) | null = null;
-  private eventBusUnsubscribers: Array<() => void> = [];
+
   private shortcutUnsubscribe: (() => void) | null = null;
+  private eventBusUnsubscribers: Array<() => void> = [];
   private navigationQueue: Array<'previous' | 'next'> = [];
   private isNavigating: boolean = false;
 
@@ -134,10 +120,6 @@ export class TimelineManager {
     this.setupEventListeners();
     this.setupObservers();
     this.conversationId = this.computeConversationId();
-    await this.loadStars();
-    await this.syncStarredFromService();
-    // Handle URL hash for starred message navigation
-    this.handleStarredMessageNavigation();
     // Initialize keyboard shortcuts
     await this.initKeyboardShortcuts();
 
@@ -202,95 +184,6 @@ export class TimelineManager {
   private computeConversationId(): string {
     const raw = `${location.host}${location.pathname}${location.search}`;
     return `gemini:${hashString(raw)}`;
-  }
-
-  /**
-   * DRY helper: Get storage key for starred messages
-   */
-  private getStarsStorageKey(): string | null {
-    return this.conversationId ? `geminiTimelineStars:${this.conversationId}` : null;
-  }
-
-  /**
-   * DRY helper: Safe localStorage getItem with try-catch
-   */
-  private safeLocalStorageGet(key: string): string | null {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.warn('[Timeline] Failed to read from localStorage:', error);
-      return null;
-    }
-  }
-
-  /**
-   * DRY helper: Safe localStorage setItem with try-catch
-   */
-  private safeLocalStorageSet(key: string, value: string): boolean {
-    try {
-      localStorage.setItem(key, value);
-      return true;
-    } catch (error) {
-      console.warn('[Timeline] Failed to write to localStorage:', error);
-      return false;
-    }
-  }
-
-  private areStarredSetsEqual(a: Set<string>, b: Set<string>): boolean {
-    if (a.size !== b.size) return false;
-    for (const value of a) {
-      if (!b.has(value)) return false;
-    }
-    return true;
-  }
-
-  private applyStarredIdSet(nextSet: Set<string>, persistLocal = true): void {
-    if (this.areStarredSetsEqual(this.starred, nextSet)) return;
-
-    this.starred = new Set(nextSet);
-
-    if (persistLocal) this.saveStars();
-
-    for (const marker of this.markers) {
-      const want = this.starred.has(marker.id);
-      if (marker.starred !== want) {
-        marker.starred = want;
-        if (marker.dotElement) {
-          marker.dotElement.classList.toggle('starred', want);
-          marker.dotElement.setAttribute('aria-pressed', want ? 'true' : 'false');
-        }
-      }
-    }
-
-    if (this.ui.tooltip?.classList.contains('visible')) {
-      const currentDot = this.ui.timelineBar?.querySelector(
-        '.timeline-dot:hover, .timeline-dot:focus'
-      ) as DotElement | null;
-      if (currentDot) this.refreshTooltipForDot(currentDot);
-    }
-  }
-
-  private applySharedStarredData(data?: StarredMessagesData | null): void {
-    if (!this.conversationId) return;
-
-    const rawMessages = data?.messages?.[this.conversationId];
-    const conversationMessages = Array.isArray(rawMessages) ? rawMessages : [];
-    const nextSet = new Set(conversationMessages.map((message) => String(message.turnId)));
-
-    this.applyStarredIdSet(nextSet);
-  }
-
-  private async syncStarredFromService(): Promise<void> {
-    if (!this.conversationId) return;
-    try {
-      const messages = await StarredMessagesService.getStarredMessagesForConversation(
-        this.conversationId
-      );
-      const nextSet = new Set(messages.map((message) => String(message.turnId)));
-      this.applyStarredIdSet(nextSet);
-    } catch (error) {
-      console.warn('[Timeline] Failed to sync starred messages from shared storage:', error);
-    }
   }
 
   private getConversationTitle(): string {
@@ -832,7 +725,7 @@ export class TimelineManager {
         n,
         baseN: n,
         dotElement: null,
-        starred: this.starred.has(id),
+        starred: false,
       };
       this.markerMap.set(id, m);
       return m;
@@ -876,11 +769,6 @@ export class TimelineManager {
       const dot = (e.target as HTMLElement).closest('.timeline-dot') as DotElement | null;
       if (!dot) return;
       const now = Date.now();
-      if (now < (this.suppressClickUntil || 0)) {
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
 
       // Use index lookup if available for robust handling of duplicate content
       const indexStr = dot.dataset.markerIndex;
@@ -911,7 +799,8 @@ export class TimelineManager {
         const fromIdx = this.getActiveIndex();
         // toIdx is already determined above
         const dur = this.computeFlowDuration(fromIdx, toIdx);
-        if (this.scrollMode === 'flow' && fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
+        // Force flow logic
+        if (fromIdx >= 0 && toIdx >= 0 && fromIdx !== toIdx) {
           this.startRunner(fromIdx, toIdx, dur);
         }
         this.smoothScrollTo(targetElement, dur);
@@ -942,45 +831,6 @@ export class TimelineManager {
     };
     this.ui.timelineBar!.addEventListener('mouseover', this.onTimelineBarOver);
     this.ui.timelineBar!.addEventListener('mouseout', this.onTimelineBarOut);
-
-    this.onPointerDown = (ev: PointerEvent) => {
-      const dot = (ev.target as HTMLElement).closest('.timeline-dot') as DotElement | null;
-      if (!dot) return;
-      if (typeof ev.button === 'number' && ev.button !== 0) return;
-      this.cancelLongPress();
-      this.pressTargetDot = dot;
-      this.pressStartPos = { x: ev.clientX, y: ev.clientY };
-      dot.classList.add('holding');
-      this.longPressTriggered = false;
-      this.longPressTimer = window.setTimeout(() => {
-        this.longPressTimer = null;
-        if (!this.pressTargetDot) return;
-        const id = this.pressTargetDot.dataset.targetTurnId!;
-        this.toggleStar(id);
-        this.longPressTriggered = true;
-        this.suppressClickUntil = Date.now() + 350;
-        this.refreshTooltipForDot(this.pressTargetDot!);
-        this.pressTargetDot.classList.remove('holding');
-      }, this.longPressDuration);
-    };
-    this.onPointerMove = (ev: PointerEvent) => {
-      if (!this.pressTargetDot || !this.pressStartPos) return;
-      const dx = ev.clientX - this.pressStartPos.x;
-      const dy = ev.clientY - this.pressStartPos.y;
-      if (dx * dx + dy * dy > this.longPressMoveTolerance * this.longPressMoveTolerance)
-        this.cancelLongPress();
-    };
-    this.onPointerUp = () => this.cancelLongPress();
-    this.onPointerCancel = () => this.cancelLongPress();
-    this.onPointerLeave = (ev: PointerEvent) => {
-      const dot = (ev.target as HTMLElement).closest('.timeline-dot') as DotElement | null;
-      if (dot && dot === this.pressTargetDot) this.cancelLongPress();
-    };
-    this.ui.timelineBar!.addEventListener('pointerdown', this.onPointerDown);
-    window.addEventListener('pointermove', this.onPointerMove, { passive: true });
-    window.addEventListener('pointerup', this.onPointerUp, { passive: true });
-    window.addEventListener('pointercancel', this.onPointerCancel, { passive: true });
-    this.ui.timelineBar!.addEventListener('pointerleave', this.onPointerLeave);
 
     this.onWindowResize = () => {
       if (this.ui.tooltip?.classList.contains('visible')) {
@@ -1031,79 +881,7 @@ export class TimelineManager {
     this.ui.slider?.addEventListener('pointerenter', this.onSliderEnter);
     this.ui.slider?.addEventListener('pointerleave', this.onSliderLeave);
 
-
-
-    this.onStorage = (e: StorageEvent) => {
-      if (!e || e.storageArea !== localStorage) return;
-      const expectedKey = this.getStarsStorageKey();
-      if (!expectedKey || e.key !== expectedKey) return;
-      let nextArr: string[] = [];
-      try {
-        nextArr = JSON.parse(e.newValue || '[]') || [];
-      } catch {
-        nextArr = [];
-      }
-      const nextSet = new Set(nextArr.map(String));
-      this.applyStarredIdSet(nextSet, false);
-    };
-    window.addEventListener('storage', this.onStorage);
-
-    if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
-      this.onChromeStorageChanged = (changes, areaName) => {
-        if (areaName !== 'local') return;
-        const starredChange = changes[StorageKeys.TIMELINE_STARRED_MESSAGES];
-        if (!starredChange) return;
-        this.applySharedStarredData(starredChange.newValue as StarredMessagesData | null);
-      };
-      chrome.storage.onChanged.addListener(this.onChromeStorageChanged);
-    }
-
-    // Subscribe to EventBus for cross-component starred state synchronization
-    this.eventBusUnsubscribers.push(
-      eventBus.on('starred:removed', ({ conversationId, turnId }) => {
-        // Only handle events for current conversation
-        if (conversationId !== this.conversationId) return;
-
-        // Update local starred set
-        if (this.starred.has(turnId)) {
-          this.starred.delete(turnId);
-          this.saveStars();
-
-          // Update marker UI
-          const marker = this.markerMap.get(turnId);
-          if (marker && marker.dotElement) {
-            marker.starred = false;
-            marker.dotElement.classList.remove('starred');
-            marker.dotElement.setAttribute('aria-pressed', 'false');
-          }
-
-          console.log('[Timeline] Starred removed via EventBus:', turnId);
-        }
-      })
-    );
-
-    this.eventBusUnsubscribers.push(
-      eventBus.on('starred:added', ({ conversationId, turnId }) => {
-        // Only handle events for current conversation
-        if (conversationId !== this.conversationId) return;
-
-        // Update local starred set
-        if (!this.starred.has(turnId)) {
-          this.starred.add(turnId);
-          this.saveStars();
-
-          // Update marker UI
-          const marker = this.markerMap.get(turnId);
-          if (marker && marker.dotElement) {
-            marker.starred = true;
-            marker.dotElement.classList.add('starred');
-            marker.dotElement.setAttribute('aria-pressed', 'true');
-          }
-
-          console.log('[Timeline] Starred added via EventBus:', turnId);
-        }
-      })
-    );
+    // EventBus listeners removed as starring is disabled
   }
 
   private smoothScrollTo(targetElement: HTMLElement, duration = 600): void {
@@ -1114,10 +892,8 @@ export class TimelineManager {
     const distance = targetPosition - startPosition;
     let startTime: number | null = null;
 
-    if (this.scrollMode === 'jump') {
-      this.scrollContainer!.scrollTop = targetPosition;
-      return;
-    }
+    // Always use flow (animation)
+
     const animation = (currentTime: number) => {
       this.isScrolling = true;
       if (startTime === null) startTime = currentTime;
@@ -1355,7 +1131,6 @@ export class TimelineManager {
     tip.classList.remove('visible');
     let fullText = (dot.getAttribute('aria-label') || '').trim();
     const id = dot.dataset.targetTurnId!;
-    if (id && this.starred.has(id)) fullText = `★ ${fullText}`;
     const p = this.computePlacementInfo(dot);
     const layout = this.truncateToThreeLines(fullText, p.width);
     tip.textContent = layout.text;
@@ -1431,7 +1206,6 @@ export class TimelineManager {
     if (!tip.classList.contains('visible')) return;
     let fullText = (dot.getAttribute('aria-label') || '').trim();
     const id = dot.dataset.targetTurnId!;
-    if (id && this.starred.has(id)) fullText = `★ ${fullText}`;
     const p = this.computePlacementInfo(dot);
     const layout = this.truncateToThreeLines(fullText, p.width);
     tip.textContent = layout.text;
@@ -1581,16 +1355,12 @@ export class TimelineManager {
         dot.style.setProperty('--n', String(marker.n || 0));
         if (this.usePixelTop) dot.style.top = `${Math.round(this.yPositions[i])}px`;
         dot.classList.toggle('active', marker.id === this.activeTurnId);
-        dot.classList.toggle('starred', !!marker.starred);
-        dot.setAttribute('aria-pressed', marker.starred ? 'true' : 'false');
         marker.dotElement = dot;
         frag.appendChild(dot);
       } else {
         marker.dotElement.dataset.markerIndex = String(i);
         marker.dotElement.style.setProperty('--n', String(marker.n || 0));
         if (this.usePixelTop) marker.dotElement.style.top = `${Math.round(this.yPositions[i])}px`;
-        marker.dotElement.classList.toggle('starred', !!marker.starred);
-        marker.dotElement.setAttribute('aria-pressed', marker.starred ? 'true' : 'false');
       }
     }
     if (localVersion !== this.markersVersion) return;
@@ -1698,99 +1468,7 @@ export class TimelineManager {
     this.tooltipHideTimer = window.setTimeout(doHide, this.tooltipHideDelay);
   }
 
-  private async toggleStar(turnId: string): Promise<void> {
-    const id = String(turnId || '');
-    if (!id) return;
 
-    const wasStarred = this.starred.has(id);
-
-    if (wasStarred) {
-      this.starred.delete(id);
-    } else {
-      this.starred.add(id);
-    }
-
-    this.saveStars();
-
-    // Update global starred messages service
-    if (wasStarred) {
-      // Remove from global storage
-      await StarredMessagesService.removeStarredMessage(this.conversationId!, id);
-    } else {
-      // Add to global storage with full message info
-      const m = this.markerMap.get(id);
-      if (m) {
-        const conversationTitle = this.getConversationTitle();
-        const message: StarredMessage = {
-          turnId: id,
-          content: m.summary,
-          conversationId: this.conversationId!,
-          conversationUrl: window.location.href,
-          conversationTitle,
-          starredAt: Date.now(),
-        };
-        await StarredMessagesService.addStarredMessage(message);
-      }
-    }
-
-    // Update UI for ALL markers with this ID (handle duplicates)
-    const isStarredNow = this.starred.has(id);
-    this.markers.forEach((m) => {
-      if (m.id === id) {
-        m.starred = isStarredNow;
-        if (m.dotElement) {
-          m.dotElement.classList.toggle('starred', isStarredNow);
-          m.dotElement.setAttribute('aria-pressed', isStarredNow ? 'true' : 'false');
-          // Only refresh tooltip if this specific dot is actively hovered/focused
-          // (checked internally by refreshTooltipForDot)
-          this.refreshTooltipForDot(m.dotElement);
-        }
-      }
-    });
-  }
-
-  /**
-   * Save starred messages to localStorage using DRY helper
-   */
-  private saveStars(): void {
-    const key = this.getStarsStorageKey();
-    if (!key) return;
-    this.safeLocalStorageSet(key, JSON.stringify(Array.from(this.starred)));
-  }
-
-  /**
-   * Load starred messages from localStorage using DRY helper
-   */
-  private async loadStars(): Promise<void> {
-    this.starred.clear();
-    const key = this.getStarsStorageKey();
-    if (!key) return;
-
-    const raw = this.safeLocalStorageGet(key);
-    if (!raw) return;
-
-    try {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        arr.forEach((id: any) => this.starred.add(String(id)));
-      }
-    } catch (error) {
-      console.warn('[Timeline] Failed to parse starred messages:', error);
-    }
-  }
-
-  private cancelLongPress(): void {
-    if (this.longPressTimer) {
-      clearTimeout(this.longPressTimer);
-      this.longPressTimer = null;
-    }
-    if (this.pressTargetDot) {
-      this.pressTargetDot.classList.remove('holding');
-    }
-    this.pressTargetDot = null;
-    this.pressStartPos = null;
-    this.longPressTriggered = false;
-  }
 
   /**
    * Initialize keyboard shortcuts for timeline navigation
@@ -1853,15 +1531,15 @@ export class TimelineManager {
     const targetMarker = this.markers[targetIndex];
     if (!targetMarker?.element) return;
 
-    if (this.scrollMode === 'flow' && currentIndex >= 0) {
+    if (currentIndex >= 0) {
       // Flow mode: animate with queue support
       const duration = this.computeFlowDuration(currentIndex, targetIndex);
       this.startRunner(currentIndex, targetIndex, duration);
       this.smoothScrollTo(targetMarker.element, duration);
       await new Promise<void>((resolve) => setTimeout(resolve, duration));
     } else {
-      // Jump mode: instant, no wait
-      this.smoothScrollTo(targetMarker.element, 0);
+      // Default to smoothed scroll if current index not found
+      this.smoothScrollTo(targetMarker.element, 650);
     }
 
     this.activeTurnId = targetMarker.id;
@@ -1892,79 +1570,7 @@ export class TimelineManager {
     await this.performNodeNavigation(targetIndex, currentIndex);
   }
 
-  /**
-   * Handle starred message navigation with optimized performance
-   * Strategy: Quick check if markers ready, otherwise retry with exponential backoff
-   */
-  private handleStarredMessageNavigation(): void {
-    try {
-      const hash = window.location.hash;
-      if (!hash.startsWith('#gv-turn-')) return;
 
-      const turnId = hash.replace('#gv-turn-', '');
-      if (!turnId) return;
-
-      console.log('[Timeline] Handling starred message navigation, turnId:', turnId);
-
-      let attempts = 0;
-      const maxAttempts = 20;
-
-      const checkAndScroll = (): boolean => {
-        if (this.markers.length === 0) return false;
-
-        const marker = this.markerMap.get(turnId);
-        if (marker && marker.element) {
-          console.log('[Timeline] Found target marker, scrolling');
-
-          // Minimal delay for DOM readiness
-          setTimeout(() => {
-            this.smoothScrollTo(marker.element, 800);
-
-            // Clear hash after scroll completes
-            setTimeout(() => {
-              window.history.replaceState(
-                null,
-                '',
-                window.location.pathname + window.location.search
-              );
-            }, 900);
-          }, 100);
-          return true;
-        }
-        return false;
-      };
-
-      // Optimized retry logic with exponential backoff
-      const retry = () => {
-        if (checkAndScroll()) return;
-
-        attempts++;
-        if (attempts >= maxAttempts) {
-          console.warn('[Timeline] Failed to find starred message');
-          window.history.replaceState(
-            null,
-            '',
-            window.location.pathname + window.location.search
-          );
-          return;
-        }
-
-        // Exponential backoff: 100ms, 200ms, 300ms, 300ms, 300ms...
-        const delay = Math.min(attempts * 100, 300);
-        setTimeout(retry, delay);
-      };
-
-      // Quick first attempt if markers might be ready
-      if (this.markers.length > 0) {
-        if (checkAndScroll()) return;
-      }
-
-      // Start retry sequence with minimal initial delay
-      setTimeout(retry, 200);
-    } catch (error) {
-      console.error('[Timeline] Failed to handle starred message navigation:', error);
-    }
-  }
 
   destroy(): void {
     // Cleanup keyboard shortcuts
@@ -1991,56 +1597,8 @@ export class TimelineManager {
     });
     this.eventBusUnsubscribers = [];
 
-    // Ensure draggable listeners are removed
-    try {
-      this.toggleDraggable(false);
-    } catch { }
-    // Also remove any in-flight drag listeners
-    try {
-      if (this.onBarPointerMove) window.removeEventListener('pointermove', this.onBarPointerMove);
-    } catch { }
-    try {
-      if (this.onBarPointerUp) window.removeEventListener('pointerup', this.onBarPointerUp);
-    } catch { }
-    try {
-      this.mutationObserver?.disconnect();
-    } catch { }
-    try {
-      this.resizeObserver?.disconnect();
-    } catch { }
-    try {
-      this.intersectionObserver?.disconnect();
-    } catch { }
-    this.visibleUserTurns.clear();
-    if (this.ui.timelineBar && this.onTimelineBarClick) {
-      try {
-        this.ui.timelineBar.removeEventListener('click', this.onTimelineBarClick);
-      } catch { }
-    }
-    try {
-      window.removeEventListener('storage', this.onStorage!);
-    } catch { }
-    if (this.onChromeStorageChanged && typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
-      try {
-        chrome.storage.onChanged.removeListener(this.onChromeStorageChanged);
-      } catch { }
-      this.onChromeStorageChanged = null;
-    }
-    try {
-      this.ui.timelineBar?.removeEventListener('pointerdown', this.onPointerDown!);
-    } catch { }
-    try {
-      window.removeEventListener('pointermove', this.onPointerMove!);
-    } catch { }
-    try {
-      window.removeEventListener('pointerup', this.onPointerUp!);
-    } catch { }
-    try {
-      window.removeEventListener('pointercancel', this.onPointerCancel!);
-    } catch { }
-    try {
-      this.ui.timelineBar?.removeEventListener('pointerleave', this.onPointerLeave!);
-    } catch { }
+    // Drag listeners removed
+
     if (this.scrollContainer && this.onScroll) {
       try {
         this.scrollContainer.removeEventListener('scroll', this.onScroll);

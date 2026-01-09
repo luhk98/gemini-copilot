@@ -12,7 +12,6 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 import { CloudSyncSettings } from './components/CloudSyncSettings';
 import { KeyboardShortcutSettings } from './components/KeyboardShortcutSettings';
-import { StarredHistory } from './components/StarredHistory';
 
 
 
@@ -51,13 +50,9 @@ interface SettingsUpdate {
 
 export default function Popup() {
   const { t } = useLanguage();
-  const [mode, setMode] = useState<ScrollMode>('flow');
-  const [hideContainer, setHideContainer] = useState<boolean>(false);
-  const [draggableTimeline, setDraggableTimeline] = useState<boolean>(false);
   const [folderEnabled, setFolderEnabled] = useState<boolean>(true);
   const [hideArchivedConversations, setHideArchivedConversations] = useState<boolean>(false);
 
-  const [showStarredHistory, setShowStarredHistory] = useState<boolean>(false);
   const [extVersion, setExtVersion] = useState<string | null>(null);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [watermarkRemoverEnabled, setWatermarkRemoverEnabled] = useState<boolean>(true);
@@ -66,12 +61,8 @@ export default function Popup() {
   // Helper function to apply settings to storage
   const apply = useCallback((settings: SettingsUpdate) => {
     const payload: any = {};
-    if (settings.mode) payload.geminiTimelineScrollMode = settings.mode;
-    if (typeof settings.hideContainer === 'boolean') payload.geminiTimelineHideContainer = settings.hideContainer;
-    if (typeof settings.draggableTimeline === 'boolean') payload.geminiTimelineDraggable = settings.draggableTimeline;
     if (typeof settings.folderEnabled === 'boolean') payload.geminiFolderEnabled = settings.folderEnabled;
     if (typeof settings.hideArchivedConversations === 'boolean') payload.geminiFolderHideArchivedConversations = settings.hideArchivedConversations;
-    if (settings.resetPosition) payload.geminiTimelinePosition = null;
     if (typeof settings.watermarkRemoverEnabled === 'boolean') payload.geminiWatermarkRemoverEnabled = settings.watermarkRemoverEnabled;
     try {
       chrome.storage?.sync?.set(payload);
@@ -159,10 +150,6 @@ export default function Popup() {
           geminiWatermarkRemoverEnabled: true,
         },
         (res) => {
-          const m = res?.geminiTimelineScrollMode as ScrollMode;
-          if (m === 'jump' || m === 'flow') setMode(m);
-          setHideContainer(!!res?.geminiTimelineHideContainer);
-          setDraggableTimeline(!!res?.geminiTimelineDraggable);
           setFolderEnabled(res?.geminiFolderEnabled !== false);
           setHideArchivedConversations(!!res?.geminiFolderHideArchivedConversations);
           setWatermarkRemoverEnabled(res?.geminiWatermarkRemoverEnabled !== false);
@@ -187,11 +174,6 @@ export default function Popup() {
   const releaseUrl = extVersion
     ? `https://github.com/Nagi-ovo/gemini-voyager/releases/tag/${currentReleaseTag ?? `v${extVersion}`}`
     : 'https://github.com/Nagi-ovo/gemini-voyager/releases';
-
-  // Show starred history if requested
-  if (showStarredHistory) {
-    return <StarredHistory onClose={() => setShowStarredHistory(false)} />;
-  }
 
   return (
     <div className="w-[360px] bg-background text-foreground">
@@ -250,103 +232,6 @@ export default function Popup() {
             </svg>
             <p className="text-xs text-primary font-medium">{t('geminiOnlyNotice')}</p>
           </div>
-        </Card>
-        {/* Timeline Options */}
-        <Card className="p-4 hover:shadow-lg transition-shadow">
-          <CardTitle className="mb-4 text-xs uppercase">{t('timelineOptions')}</CardTitle>
-          <CardContent className="p-0 space-y-4">
-            {/* Scroll Mode */}
-            <div>
-              <Label className="text-sm font-medium mb-2 block">{t('scrollMode')}</Label>
-              <div className="relative grid grid-cols-2 rounded-lg bg-secondary/50 p-1 gap-1">
-                <div
-                  className="absolute top-1 bottom-1 w-[calc(50%-6px)] rounded-md bg-primary shadow-md pointer-events-none transition-all duration-300 ease-out"
-                  style={{ left: mode === 'flow' ? '4px' : 'calc(50% + 2px)' }}
-                />
-                <button
-                  className={`relative z-10 px-3 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${mode === 'flow' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  onClick={() => {
-                    setMode('flow');
-                    apply({ mode: 'flow' });
-                  }}
-                >
-                  {t('flow')}
-                </button>
-                <button
-                  className={`relative z-10 px-3 py-2 text-sm font-semibold rounded-md transition-all duration-200 ${mode === 'jump' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  onClick={() => {
-                    setMode('jump');
-                    apply({ mode: 'jump' });
-                  }}
-                >
-                  {t('jump')}
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center justify-between group">
-              <Label htmlFor="hide-container" className="cursor-pointer text-sm font-medium group-hover:text-primary transition-colors">
-                {t('hideOuterContainer')}
-              </Label>
-              <Switch
-                id="hide-container"
-                checked={hideContainer}
-                onChange={(e) => {
-                  setHideContainer(e.target.checked);
-                  apply({ hideContainer: e.target.checked });
-                }}
-              />
-            </div>
-            <div className="flex items-center justify-between group">
-              <Label htmlFor="draggable-timeline" className="cursor-pointer text-sm font-medium group-hover:text-primary transition-colors">
-                {t('draggableTimeline')}
-              </Label>
-              <Switch
-                id="draggable-timeline"
-                checked={draggableTimeline}
-                onChange={(e) => {
-                  setDraggableTimeline(e.target.checked);
-                  apply({ draggableTimeline: e.target.checked });
-                }}
-              />
-            </div>
-            {/* Reset Timeline Position Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full group hover:border-primary/50 mt-2"
-              onClick={() => {
-                apply({ resetPosition: true });
-              }}
-            >
-              <span className="group-hover:scale-105 transition-transform text-xs">{t('resetTimelinePosition')}</span>
-            </Button>
-            {/* View Starred History Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full group hover:border-primary/50 mt-2"
-              onClick={() => setShowStarredHistory(true)}
-            >
-              <span className="group-hover:scale-105 transition-transform text-xs flex items-center gap-1.5">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-primary"
-                >
-                  <path
-                    d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-                    fill="currentColor"
-                  />
-                </svg>
-                {t('viewStarredHistory')}
-              </span>
-            </Button>
-          </CardContent>
         </Card>
         {/* Folder Options */}
         <Card className="p-4 hover:shadow-lg transition-shadow">
