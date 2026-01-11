@@ -1,14 +1,18 @@
 {
   "action": {
-    "default_icon": "public/dev-icon-32.png",
+    "default_icon": "public/icon-32.png",
     "default_popup": "src/pages/popup/index.html"
   },
   "icons": {
-    "128": "public/dev-icon-128.png"
+    "128": "public/icon-128.png"
   },
   "web_accessible_resources": [
     {
-      "resources": ["contentStyle.css", "dev-icon-128.png", "dev-icon-32.png", "icon-32.png", "icon-128.png"],
+      "resources": [
+        "contentStyle.css",
+        "icon-32.png",
+        "icon-128.png"
+      ],
       "matches": [
         "<all_urls>"
       ]
@@ -16,9 +20,15 @@
   ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["src/pages/content/index.tsx"],
-      "css": ["contentStyle.css"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/pages/content/index.tsx"
+      ],
+      "css": [
+        "contentStyle.css"
+      ]
     }
   ],
   "host_permissions": [

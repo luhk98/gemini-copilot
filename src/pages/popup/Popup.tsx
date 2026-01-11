@@ -16,27 +16,12 @@ import { KeyboardShortcutSettings } from './components/KeyboardShortcutSettings'
 
 
 import { isSafari } from '@/core/utils/browser';
-import { compareVersions } from '@/core/utils/version';
 
 type ScrollMode = 'jump' | 'flow';
 
 
 
-const LATEST_VERSION_CACHE_KEY = 'gvLatestVersionCache';
-const LATEST_VERSION_MAX_AGE = 1000 * 60 * 60 * 6; // 6 hours
 
-const normalizeVersionString = (version?: string | null): string | null => {
-  if (!version) return null;
-  const trimmed = version.trim();
-  return trimmed ? trimmed.replace(/^v/i, '') : null;
-};
-
-const toReleaseTag = (version?: string | null): string | null => {
-  if (!version) return null;
-  const trimmed = version.trim();
-  if (!trimmed) return null;
-  return trimmed.startsWith('v') ? trimmed : `v${trimmed}`;
-};
 
 interface SettingsUpdate {
   mode?: ScrollMode | null;
@@ -53,8 +38,6 @@ export default function Popup() {
   const [folderEnabled, setFolderEnabled] = useState<boolean>(true);
   const [hideArchivedConversations, setHideArchivedConversations] = useState<boolean>(false);
 
-  const [extVersion, setExtVersion] = useState<string | null>(null);
-  const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [watermarkRemoverEnabled, setWatermarkRemoverEnabled] = useState<boolean>(true);
 
 
@@ -71,72 +54,7 @@ export default function Popup() {
 
 
 
-  useEffect(() => {
-    try {
-      const version = chrome?.runtime?.getManifest?.()?.version;
-      if (version) {
-        setExtVersion(version);
-      }
-    } catch (err) {
-      console.error('[Gemini Voyager] Failed to get extension version:', err);
-    }
-  }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const fetchLatestVersion = async () => {
-      if (!extVersion) return;
-
-      try {
-        const cache = await browser.storage.local.get(LATEST_VERSION_CACHE_KEY);
-        const cached = cache?.[LATEST_VERSION_CACHE_KEY] as { version?: string; fetchedAt?: number } | undefined;
-        const now = Date.now();
-
-        let latest =
-          cached && cached.version && cached.fetchedAt && now - cached.fetchedAt < LATEST_VERSION_MAX_AGE
-            ? cached.version
-            : null;
-
-        if (!latest) {
-          const resp = await fetch('https://api.github.com/repos/Nagi-ovo/gemini-voyager/releases/latest', {
-            headers: { Accept: 'application/vnd.github+json' },
-          });
-
-          if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}`);
-          }
-
-          const data = await resp.json();
-          const candidate =
-            typeof data.tag_name === 'string'
-              ? data.tag_name
-              : (typeof data.name === 'string' ? data.name : null);
-
-          if (candidate) {
-            latest = candidate;
-            await browser.storage.local.set({
-              [LATEST_VERSION_CACHE_KEY]: { version: candidate, fetchedAt: now },
-            });
-          }
-        }
-
-        if (cancelled || !latest) return;
-
-        setLatestVersion(latest);
-      } catch (error) {
-        if (!cancelled) {
-          console.warn('[Gemini Voyager] Failed to check latest version:', error);
-        }
-      }
-    };
-
-    fetchLatestVersion();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [extVersion]);
 
   useEffect(() => {
     try {
@@ -160,20 +78,7 @@ export default function Popup() {
 
 
 
-  const normalizedCurrentVersion = normalizeVersionString(extVersion);
-  const normalizedLatestVersion = normalizeVersionString(latestVersion);
-  const hasUpdate =
-    normalizedCurrentVersion && normalizedLatestVersion
-      ? compareVersions(normalizedLatestVersion, normalizedCurrentVersion) > 0
-      : false;
-  const latestReleaseTag = toReleaseTag(latestVersion ?? normalizedLatestVersion ?? undefined);
-  const latestReleaseUrl = latestReleaseTag
-    ? `https://github.com/Nagi-ovo/gemini-voyager/releases/tag/${latestReleaseTag}`
-    : 'https://github.com/Nagi-ovo/gemini-voyager/releases/latest';
-  const currentReleaseTag = toReleaseTag(extVersion);
-  const releaseUrl = extVersion
-    ? `https://github.com/Nagi-ovo/gemini-voyager/releases/tag/${currentReleaseTag ?? `v${extVersion}`}`
-    : 'https://github.com/Nagi-ovo/gemini-voyager/releases';
+
 
   return (
     <div className="w-[360px] bg-background text-foreground">
@@ -189,31 +94,6 @@ export default function Popup() {
       </div>
 
       <div className="p-5 space-y-4">
-        {hasUpdate && normalizedLatestVersion && normalizedCurrentVersion && (
-          <Card className="p-3 bg-amber-50 border-amber-200 text-amber-900 shadow-sm">
-            <div className="flex items-start gap-3">
-              <div className="mt-1 text-amber-600">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2l4 4h-3v7h-2V6H8l4-4zm6 11v6H6v-6H4v8h16v-8h-2z" />
-                </svg>
-              </div>
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-semibold leading-tight">{t('newVersionAvailable')}</p>
-                <p className="text-xs leading-tight">
-                  {t('currentVersionLabel')}: v{normalizedCurrentVersion} · {t('latestVersionLabel')}: v{normalizedLatestVersion}
-                </p>
-              </div>
-              <a
-                href={latestReleaseUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-md transition-colors"
-              >
-                {t('updateNow')}
-              </a>
-            </div>
-          </Card>
-        )}
         {/* Gemini Only Notice */}
         <Card className="p-3 bg-primary/10 border-primary/20 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-2">
@@ -302,19 +182,7 @@ export default function Popup() {
       </div>
 
       {/* Footer */}
-      <div className="bg-linear-to-br from-secondary/30 via-accent/10 to-transparent border-t border-border/50 px-5 py-4 flex items-center justify-between gap-3 backdrop-blur-sm">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground/80">{t('extensionVersion')}</span>
-          <a
-            href={releaseUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="font-semibold text-primary hover:text-primary/80 transition-colors"
-            title={extVersion ? extVersion : undefined}
-          >
-            {extVersion ?? '...'}
-          </a>
-        </div>
+      <div className="bg-linear-to-br from-secondary/30 via-accent/10 to-transparent border-t border-border/50 px-5 py-4 flex items-center justify-center backdrop-blur-sm">
         <a
           href="https://github.com/Nagi-ovo/gemini-voyager"
           target="_blank"

@@ -187,26 +187,6 @@
     "message": "Backups include all prompts and folders, saved in a timestamped folder (format: backup-YYYYMMDD-HHMMSS)",
     "description": "Backup feature note"
   },
-  "extensionVersion": {
-    "message": "Version",
-    "description": "Extension version label"
-  },
-  "newVersionAvailable": {
-    "message": "New version available",
-    "description": "Update reminder title"
-  },
-  "currentVersionLabel": {
-    "message": "Current",
-    "description": "Label for current version number"
-  },
-  "latestVersionLabel": {
-    "message": "Latest",
-    "description": "Label for latest version number"
-  },
-  "updateNow": {
-    "message": "Update",
-    "description": "CTA to update to latest version"
-  },
   "starProject": {
     "message": "Support me ⭐",
     "description": "Github callout"
